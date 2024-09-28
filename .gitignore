@@ -12,7 +12,7 @@ db.sqlite3
 local_settings.py
 .env
 *.env
-venv/  # Игнорировать виртуальную среду
+venv/ 
 
 # Frontend
 node_modules/
