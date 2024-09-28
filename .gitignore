@@ -1,0 +1,78 @@
+# Игнорирование для Django проекта
+
+# Базовые системные файлы
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+
+# Django кэш и базы данных
+db.sqlite3
+db.sqlite3-journal
+
+# Static and media files
+staticfiles/
+media/
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Pytest
+.pytest_cache/
+coverage/
+htmlcov/
+
+# Миграции (если они не должны отслеживаться)
+**/migrations/
+
+# Настройки среды разработки и редакторов
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# macOS системные файлы
+.DS_Store
+
+# Игнорирование для React проекта
+
+# Базовые файлы npm и сборки
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Папка сборки React
+build/
+dist/
+
+# Logs
+logs
+*.log
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Webpack file
+*.webpack.js
+
+# ESLint cache
+.eslintcache
+
+# Папки и файлы конфигураций IDE/редакторов
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# MacOS system files
+.DS_Store
