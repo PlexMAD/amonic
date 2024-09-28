@@ -1,0 +1,33 @@
+# Django
+*.pyc
+__pycache__/
+db.sqlite3
+/media
+/staticfiles
+*.log
+*.pot
+*.py[cod]
+*.egg-info/
+.eggs/
+local_settings.py
+.env
+*.env
+
+# Frontend
+node_modules/
+build/
+dist/
+*.log
+*.DS_Store
+
+# IDEs and Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.bak
+
+# OS files
+Thumbs.db
+.DS_Store
