@@ -81,8 +81,6 @@ class Users(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
-
-
 class UserSessionTracking(models.Model):
     user = models.ForeignKey(Users, on_delete=models.CASCADE)
     login_time = models.DateTimeField(default=timezone.now)

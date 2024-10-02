@@ -16,6 +16,15 @@ const AdminPanel = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [selectedOffice, setSelectedOffice] = useState<string>('Все офисы');
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [newUser, setNewUser] = useState({
+    email: '',
+    firstname: '',
+    lastname: '',
+    office_name: '',
+    birthdate: '',
+    password: '',
+  });
 
   useEffect(() => {
     axios.get('http://127.0.0.1:8000/api/users/')
@@ -53,6 +62,34 @@ const AdminPanel = () => {
     return (currentYear - birthYear).toString();
   };
 
+  const handleAddUser = () => {
+    const token = localStorage.getItem('access_token');
+  
+    axios.post('http://127.0.0.1:8000/api/add_user/', newUser, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+    .then(() => {
+      alert('Пользователь успешно добавлен');
+      setShowModal(false);
+      setNewUser({
+        email: '',
+        firstname: '',
+        lastname: '',
+        office_name: '',
+        birthdate: '',
+        password: '',
+      });
+      window.location.reload(); 
+    })
+    .catch((error) => {
+      console.error('Ошибка при добавлении пользователя', error);
+      alert('Ошибка при добавлении пользователя');
+    });
+  };
+  
+
   return (
     <div>
       <h1>Админ панель</h1>
@@ -65,6 +102,8 @@ const AdminPanel = () => {
           </option>
         ))}
       </select>
+
+      <button onClick={() => setShowModal(true)}>Добавить пользователя</button>
 
       <table>
         <thead>
@@ -90,6 +129,67 @@ const AdminPanel = () => {
           ))}
         </tbody>
       </table>
+
+      {showModal && (
+        <div className="modal">
+          <h2>Добавить пользователя</h2>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            handleAddUser();
+          }}>
+            <label>Email:</label>
+            <input
+              type="email"
+              value={newUser.email}
+              onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+              required
+            />
+            <label>Имя:</label>
+            <input
+              type="text"
+              value={newUser.firstname}
+              onChange={(e) => setNewUser({ ...newUser, firstname: e.target.value })}
+              required
+            />
+            <label>Фамилия:</label>
+            <input
+              type="text"
+              value={newUser.lastname}
+              onChange={(e) => setNewUser({ ...newUser, lastname: e.target.value })}
+              required
+            />
+            <label>Офис:</label>
+            <select
+              value={newUser.office_name}
+              onChange={(e) => setNewUser({ ...newUser, office_name: e.target.value })}
+              required
+            >
+              <option value="">Выберите офис</option>
+              {[...new Set(users.map(user => user.office_name))].map((officeName, index) => (
+                <option key={index} value={officeName}>
+                  {officeName}
+                </option>
+              ))}
+            </select>
+            <label>Дата рождения:</label>
+            <input
+              type="date"
+              value={newUser.birthdate}
+              onChange={(e) => setNewUser({ ...newUser, birthdate: e.target.value })}
+              required
+            />
+            <label>Пароль:</label>
+            <input
+              type="password"
+              value={newUser.password}
+              onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+              required
+            />
+            <button type="submit">Добавить</button>
+          </form>
+          <button onClick={() => setShowModal(false)}>Закрыть</button>
+        </div>
+      )}
     </div>
   );
 };
