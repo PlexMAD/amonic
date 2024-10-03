@@ -68,8 +68,8 @@ const AdminPanel = () => {
 
   const handleAddUser = () => {
     const token = localStorage.getItem('access_token');
-  
-    axios.post('http://127.0.0.1:8000/api/add_user/', newUser, {
+
+    axios.post('http://127.0.0.1:8000/api/add_user/', { ...newUser, roleid: 2, active: 1 }, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -85,7 +85,7 @@ const AdminPanel = () => {
         birthdate: '',
         password: '',
       });
-      window.location.reload(); 
+      window.location.reload();
     })
     .catch((error) => {
       console.error('Ошибка при добавлении пользователя', error);
@@ -110,7 +110,7 @@ const AdminPanel = () => {
     .then(() => {
       alert('Пользователь успешно обновлен');
       setShowModal(false);
-      window.location.reload(); 
+      window.location.reload();
     })
     .catch((error) => {
       console.error('Ошибка при обновлении пользователя', error);
@@ -131,7 +131,20 @@ const AdminPanel = () => {
         ))}
       </select>
 
-      <button onClick={() => setShowModal(true)}>Добавить пользователя</button>
+      <button onClick={() => {
+          setUserData(null);
+          setShowModal(true);
+          setNewUser({
+            email: '',
+            firstname: '',
+            lastname: '',
+            office_name: '',
+            birthdate: '',
+            password: '',
+          });
+        }}>
+        Добавить пользователя
+      </button>
 
       <table>
         <thead>
@@ -196,6 +209,13 @@ const AdminPanel = () => {
                 : setNewUser({ ...newUser, lastname: e.target.value })}
               required
             />
+            <label>Пароль:</label>
+            <input
+              type="password"
+              value={newUser.password}
+              onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+              required
+            />
             <label>Офис:</label>
             <select
               value={userData?.office_name || newUser.office_name}
@@ -220,32 +240,31 @@ const AdminPanel = () => {
                 : setNewUser({ ...newUser, birthdate: e.target.value })}
               required
             />
-            <label>Роль:</label>
-            <select
-                value={userData?.roleid || 2} 
-                onChange={(e) => 
-                  setUserData((prevData) => prevData 
-                    ? { ...prevData, roleid: Number(e.target.value), id: prevData.id || 0 } 
-                    : null)
-                }
-              >
-                <option value={1}>Администратор</option>
-                <option value={2}>Пользователь</option>
-              </select>
-              <select
-                value={userData?.active || 0}
-                onChange={(e) =>
-                  setUserData((prevState) =>
-                    prevState ? { ...prevState, active: Number(e.target.value) } : null
-                  )
-                }
-              >
-                <option value={1}>Активен</option>
-                <option value={0}>Неактивен</option>
-              </select>
+            {userData && (
+              <>
+                <label>Роль:</label>
+                <select
+                  value={userData.roleid}
+                  onChange={(e) => userData && setUserData({ ...userData, roleid: Number(e.target.value) })}
+                  required
+                >
+                  <option value="1">Администратор</option>
+                  <option value="2">Пользователь</option>
+                </select>
+                <label>Статус активности:</label>
+                <select
+                  value={userData.active}
+                  onChange={(e) => userData && setUserData({ ...userData, active: Number(e.target.value) })}
+                  required
+                >
+                  <option value="1">Активен</option>
+                  <option value="0">Неактивен</option>
+                </select>
+              </>
+            )}
             <button type="submit">{userData ? 'Сохранить' : 'Добавить'}</button>
+            <button type="button" onClick={() => setShowModal(false)}>Закрыть</button>
           </form>
-          <button onClick={() => setShowModal(false)}>Закрыть</button>
         </div>
       )}
     </div>
