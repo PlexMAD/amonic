@@ -93,7 +93,7 @@ def add_user(request):
     try:
         office_name = data.get('office_name')
         office = Offices.objects.get(title=office_name)
-        role=Roles.objects.get(id=2)
+        role = Roles.objects.get(id=2)
         user = User.objects.create(
             email=data['email'],
             roleid=role,
@@ -113,34 +113,34 @@ def add_user(request):
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def update_user(request, user_id):
-    if request.user.roleid.id != 1:
-        return Response({'error': 'Вы не администратор'}, status=status.HTTP_403_FORBIDDEN)
-
+    print(request.data)
     try:
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
         return Response({'error': 'Пользователь не найден'}, status=status.HTTP_404_NOT_FOUND)
 
-    data = request.data
-    try:
-        user.email = data.get('email', user.email)
-        user.firstname = data.get('firstname', user.firstname)
-        user.lastname = data.get('lastname', user.lastname)
+    if request.method == 'PATCH':
+        data = request.data
+        try:
+            user.email = data.get('email', user.email)
+            user.firstname = data.get('firstname', user.firstname)
+            user.lastname = data.get('lastname', user.lastname)
+            user.active = data.get('active', user.active)
+            if 'office_name' in data:
+                office = Offices.objects.get(title=data['office_name'])
+                user.officeid = office
 
-        if 'office_name' in data:
-            office = Offices.objects.get(name=data['office_name'])
-            user.officeid = office
+            if 'roleid' in data:
+                role = Roles.objects.get(id=data['roleid'])
+                user.roleid = role
 
-        if 'roleid' in data:
-            role = Roles.objects.get(id=data['roleid'])
-            user.roleid = role
+            user.save()
+            return Response({'message': 'Пользователь успешно обновлен'}, status=status.HTTP_200_OK)
 
-        user.save()
-        return Response({'message': 'Пользователь успешно обновлен'}, status=status.HTTP_200_OK)
-
-    except Offices.DoesNotExist:
-        return Response({'error': 'Офис не найден'}, status=status.HTTP_400_BAD_REQUEST)
-    except Roles.DoesNotExist:
-        return Response({'error': 'Роль не найдена'}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Offices.DoesNotExist:
+            return Response({'error': 'Офис не найден'}, status=status.HTTP_400_BAD_REQUEST)
+        except Roles.DoesNotExist:
+            return Response({'error': 'Роль не найдена'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(e)
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

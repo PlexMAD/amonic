@@ -17,6 +17,7 @@ const AdminPanel = () => {
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [selectedOffice, setSelectedOffice] = useState<string>('Все офисы');
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [offices, setOffices] = useState<string[]>([]);
   const [newUser, setNewUser] = useState({
     email: '',
     firstname: '',
@@ -25,12 +26,15 @@ const AdminPanel = () => {
     birthdate: '',
     password: '',
   });
+  const [userData, setUserData] = useState<User | null>(null);
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/api/users/')
+    axios.get<User[]>('http://127.0.0.1:8000/api/users/')
       .then((response) => {
         setUsers(response.data);
         setFilteredUsers(response.data);
+        const uniqueOffices: string[] = [...new Set(response.data.map((user) => user.office_name))];
+        setOffices(uniqueOffices);
       })
       .catch((error) => {
         console.error("Произошла ошибка при получении пользователей!", error);
@@ -88,7 +92,31 @@ const AdminPanel = () => {
       alert('Ошибка при добавлении пользователя');
     });
   };
-  
+
+  const handleEditUser = (user: User) => {
+    setUserData(user);
+    setShowModal(true);
+  };
+
+  const handleSaveUser = () => {
+    const token = localStorage.getItem('access_token');
+    if (!userData) return;
+
+    axios.patch(`http://127.0.0.1:8000/api/update_user/${userData.id}/`, userData, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+    .then(() => {
+      alert('Пользователь успешно обновлен');
+      setShowModal(false);
+      window.location.reload(); 
+    })
+    .catch((error) => {
+      console.error('Ошибка при обновлении пользователя', error);
+      alert('Ошибка при обновлении пользователя');
+    });
+  };
 
   return (
     <div>
@@ -96,7 +124,7 @@ const AdminPanel = () => {
       <label>Офис: </label>
       <select value={selectedOffice} onChange={(e) => handleOfficeChange(e.target.value)}>
         <option value="Все офисы">Все офисы</option>
-        {[...new Set(users.map(user => user.office_name))].map((officeName, index) => (
+        {offices.map((officeName, index) => (
           <option key={index} value={officeName}>
             {officeName}
           </option>
@@ -114,6 +142,7 @@ const AdminPanel = () => {
             <th>Возраст</th>
             <th>Роль</th>
             <th>Офис</th>
+            <th>Действия</th>
           </tr>
         </thead>
         <tbody>
@@ -125,6 +154,9 @@ const AdminPanel = () => {
               <td>{calculateAge(user.birthdate)}</td>
               <td>{user.roleid === 1 ? 'Администратор' : 'Пользователь'}</td>
               <td>{user.office_name}</td>
+              <td>
+                <button onClick={() => handleEditUser(user)}>Редактировать</button>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -132,40 +164,48 @@ const AdminPanel = () => {
 
       {showModal && (
         <div className="modal">
-          <h2>Добавить пользователя</h2>
+          <h2>{userData ? 'Редактировать пользователя' : 'Добавить пользователя'}</h2>
           <form onSubmit={(e) => {
             e.preventDefault();
-            handleAddUser();
+            userData ? handleSaveUser() : handleAddUser();
           }}>
             <label>Email:</label>
             <input
               type="email"
-              value={newUser.email}
-              onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+              value={userData?.email || newUser.email}
+              onChange={(e) => userData 
+                ? setUserData({ ...userData, email: e.target.value }) 
+                : setNewUser({ ...newUser, email: e.target.value })}
               required
             />
             <label>Имя:</label>
             <input
               type="text"
-              value={newUser.firstname}
-              onChange={(e) => setNewUser({ ...newUser, firstname: e.target.value })}
+              value={userData?.firstname || newUser.firstname}
+              onChange={(e) => userData 
+                ? setUserData({ ...userData, firstname: e.target.value }) 
+                : setNewUser({ ...newUser, firstname: e.target.value })}
               required
             />
             <label>Фамилия:</label>
             <input
               type="text"
-              value={newUser.lastname}
-              onChange={(e) => setNewUser({ ...newUser, lastname: e.target.value })}
+              value={userData?.lastname || newUser.lastname}
+              onChange={(e) => userData 
+                ? setUserData({ ...userData, lastname: e.target.value }) 
+                : setNewUser({ ...newUser, lastname: e.target.value })}
               required
             />
             <label>Офис:</label>
             <select
-              value={newUser.office_name}
-              onChange={(e) => setNewUser({ ...newUser, office_name: e.target.value })}
+              value={userData?.office_name || newUser.office_name}
+              onChange={(e) => userData 
+                ? setUserData({ ...userData, office_name: e.target.value }) 
+                : setNewUser({ ...newUser, office_name: e.target.value })}
               required
             >
               <option value="">Выберите офис</option>
-              {[...new Set(users.map(user => user.office_name))].map((officeName, index) => (
+              {offices.map((officeName, index) => (
                 <option key={index} value={officeName}>
                   {officeName}
                 </option>
@@ -174,18 +214,36 @@ const AdminPanel = () => {
             <label>Дата рождения:</label>
             <input
               type="date"
-              value={newUser.birthdate}
-              onChange={(e) => setNewUser({ ...newUser, birthdate: e.target.value })}
+              value={userData?.birthdate || newUser.birthdate}
+              onChange={(e) => userData 
+                ? setUserData({ ...userData, birthdate: e.target.value }) 
+                : setNewUser({ ...newUser, birthdate: e.target.value })}
               required
             />
-            <label>Пароль:</label>
-            <input
-              type="password"
-              value={newUser.password}
-              onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-              required
-            />
-            <button type="submit">Добавить</button>
+            <label>Роль:</label>
+            <select
+                value={userData?.roleid || 2} 
+                onChange={(e) => 
+                  setUserData((prevData) => prevData 
+                    ? { ...prevData, roleid: Number(e.target.value), id: prevData.id || 0 } 
+                    : null)
+                }
+              >
+                <option value={1}>Администратор</option>
+                <option value={2}>Пользователь</option>
+              </select>
+              <select
+                value={userData?.active || 0}
+                onChange={(e) =>
+                  setUserData((prevState) =>
+                    prevState ? { ...prevState, active: Number(e.target.value) } : null
+                  )
+                }
+              >
+                <option value={1}>Активен</option>
+                <option value={0}>Неактивен</option>
+              </select>
+            <button type="submit">{userData ? 'Сохранить' : 'Добавить'}</button>
           </form>
           <button onClick={() => setShowModal(false)}>Закрыть</button>
         </div>
