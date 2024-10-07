@@ -24,7 +24,7 @@ const App: React.FC = () => {
           setUserRole(null);
         }
       } else {
-        setUserRole(null); // Пользователь не авторизован
+        setUserRole(null);
       }
       setLoading(false);
     };

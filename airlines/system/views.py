@@ -13,7 +13,10 @@ from rest_framework import status
 from django.core.cache import cache
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
-
+from django.contrib.auth import login, logout
+from django.shortcuts import redirect
+from django.utils import timezone
+from .models import UserSessionTracking
 User = get_user_model()
 
 
@@ -27,8 +30,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
         attempts = cache.get(attempts_key, 0)
         lockout_time = cache.get(lockout_key)
-        print(lockout_time)
-        print(attempts)
 
         if lockout_time:
             return Response({"detail": "Слишком много попыток. Попробуйте позже"},
@@ -41,18 +42,15 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
         try:
             response = super().post(request, *args, **kwargs)
+            if response.status_code == status.HTTP_200_OK:
+                user = User.objects.get(email=email)
+                UserSessionTracking.objects.create(user=user, login_time=timezone.now())
+                cache.delete(attempts_key)
+                cache.delete(lockout_key)
+            return response
         except Exception as e:
             error_messages = e.detail.get('non_field_errors', [])
             return Response({"detail": error_messages}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        if response.status_code == status.HTTP_200_OK:
-            cache.delete(attempts_key)
-            cache.delete(lockout_key)
-            return response
-        else:
-            attempts += 1
-            cache.set(attempts_key, attempts, timeout=3600)
-            return Response({"detail": "Неправильный логин или пароль."}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -144,3 +142,16 @@ def update_user(request, user_id):
         except Exception as e:
             print(e)
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout_view(request):
+    try:
+        session = UserSessionTracking.objects.filter(user=request.user, logout_time__isnull=True).last()
+        if session:
+            session.logout_time = timezone.now()
+            session.save()
+        logout(request)
+        return Response({'message': 'Выход выполнен успешно'}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': 'Произошла ошибка при выходе'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

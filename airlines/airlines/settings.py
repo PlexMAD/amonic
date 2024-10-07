@@ -125,7 +125,8 @@ STATICFILES_DIRS = [
 AUTH_USER_MODEL = 'system.Users'
 INSTALLED_APPS += ['corsheaders']
 MIDDLEWARE += ['corsheaders.middleware.CorsMiddleware',
-               'django.middleware.common.CommonMiddleware', ]
+               'django.middleware.common.CommonMiddleware',
+               'system.middleware.UserSessionTrackingMiddleware']
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',

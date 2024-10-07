@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+
 interface User {
   id: number;
   firstname: string;
@@ -27,6 +28,7 @@ const AdminPanel = () => {
     password: '',
   });
   const [userData, setUserData] = useState<User | null>(null);
+
 
   useEffect(() => {
     axios.get<User[]>('http://127.0.0.1:8000/api/users/')
@@ -118,6 +120,25 @@ const AdminPanel = () => {
     });
   };
 
+  const handleLogout = () => {
+    const token = localStorage.getItem('access_token');
+    
+    axios.post('http://127.0.0.1:8000/api/logout/', {}, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      }
+    })
+    .then(() => {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      window.location.reload();
+    })
+    .catch(error => {
+      console.error('Ошибка при выходе из системы', error);
+      alert('Произошла ошибка при выходе из системы');
+    });
+  };
+
   return (
     <div>
       <h1>Админ панель</h1>
@@ -145,6 +166,7 @@ const AdminPanel = () => {
         }}>
         Добавить пользователя
       </button>
+      <button onClick={handleLogout}>Выйти</button>
 
       <table>
         <thead>
