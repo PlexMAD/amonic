@@ -155,3 +155,7 @@ def logout_view(request):
         return Response({'message': 'Выход выполнен успешно'}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'error': 'Произошла ошибка при выходе'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+def test_error(request):
+    raise ValueError("Искусственная ошибка для тестирования")

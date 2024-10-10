@@ -138,6 +138,26 @@ const AdminPanel = () => {
       alert('Произошла ошибка при выходе из системы');
     });
   };
+  const handleTestError = () => {
+    const token = localStorage.getItem('access_token');
+  
+    axios.get('http://127.0.0.1:8000/api/test_error/', {
+      headers: {
+        'Authorization': `Bearer ${token}`, 
+      }
+    })
+    .then(() => {
+
+    })
+    .catch(error => {
+      console.error('Ошибка для тестирования', error);
+      alert('Произошла ошибка для тестирования');
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      window.location.reload();
+    });
+  };
+  
 
   return (
     <div>
@@ -167,6 +187,7 @@ const AdminPanel = () => {
         Добавить пользователя
       </button>
       <button onClick={handleLogout}>Выйти</button>
+      <button onClick={handleTestError}>Сгенерировать ошибку</button>
 
       <table>
         <thead>
