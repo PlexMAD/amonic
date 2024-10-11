@@ -1,23 +1,23 @@
+from django.contrib.auth import get_user_model
+from django.contrib.auth import logout
 from django.contrib.auth.hashers import make_password
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
-
-from .models import Users, Offices, Roles
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .serializers import UsersSerializer, CustomTokenObtainPairSerializer, OfficesSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.views import APIView
+
+from .models import Offices, Roles
+from .serializers import UsersSerializer, OfficesSerializer
+
+User = get_user_model()
+
+from django.utils import timezone
+from django.core.cache import cache
 from rest_framework.response import Response
 from rest_framework import status
-from django.core.cache import cache
-from django.utils.translation import gettext_lazy as _
-from django.contrib.auth import get_user_model
-from django.contrib.auth import login, logout
-from django.shortcuts import redirect
-from django.utils import timezone
-from .models import UserSessionTracking
-User = get_user_model()
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .models import Users, UserSessionTracking
+from .serializers import CustomTokenObtainPairSerializer
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -36,7 +36,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                             status=status.HTTP_429_TOO_MANY_REQUESTS)
 
         if attempts >= 3:
-            cache.set(lockout_key, True, 5)
+            cache.set(lockout_key, True, 5 * 60)
             return Response({"detail": "Слишком много попыток. Попробуйте позже"},
                             status=status.HTTP_429_TOO_MANY_REQUESTS)
 
@@ -44,9 +44,18 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             response = super().post(request, *args, **kwargs)
             if response.status_code == status.HTTP_200_OK:
                 user = User.objects.get(email=email)
-                UserSessionTracking.objects.create(user=user, login_time=timezone.now())
+                last_session = UserSessionTracking.objects.filter(user=user, logout_time__isnull=True).last()
+
+                if last_session:
+                    last_session.logout_reason = 'Токен устарел'
+                    last_session.save()
+                    UserSessionTracking.objects.create(user=user, login_time=timezone.now())
+                else:
+                    UserSessionTracking.objects.create(user=user, login_time=timezone.now())
+
                 cache.delete(attempts_key)
                 cache.delete(lockout_key)
+
             return response
         except Exception as e:
             error_messages = e.detail.get('non_field_errors', [])
