@@ -1,6 +1,6 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
-from .models import Users, Offices
+from .models import Users, Offices, UserSessionTracking
 from django.core.cache import cache
 from rest_framework import status
 from rest_framework import serializers
@@ -48,3 +48,8 @@ class OfficesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Offices
         fields = '__all__'
+
+class UserSessionTrackingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserSessionTracking
+        fields = ['login_time', 'logout_time', 'duration', 'logout_reason']

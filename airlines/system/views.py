@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 from .models import Offices, Roles
-from .serializers import UsersSerializer, OfficesSerializer
+from .serializers import UsersSerializer, OfficesSerializer, UserSessionTrackingSerializer
 
 User = get_user_model()
 
@@ -152,6 +152,7 @@ def update_user(request, user_id):
             print(e)
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logout_view(request):
@@ -165,6 +166,15 @@ def logout_view(request):
     except Exception as e:
         return Response({'error': 'Произошла ошибка при выходе'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 @api_view(['GET'])
 def test_error(request):
     raise ValueError("Искусственная ошибка для тестирования")
+
+
+class UserSessionTrackingViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = UserSessionTrackingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return UserSessionTracking.objects.filter(user=self.request.user).order_by('-login_time')
