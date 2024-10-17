@@ -6,8 +6,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
-from .models import Offices, Roles
-from .serializers import UsersSerializer, OfficesSerializer, UserSessionTrackingSerializer
+from .models import Offices, Roles, Airports, Routes, Schedules
+from .serializers import UsersSerializer, OfficesSerializer, UserSessionTrackingSerializer, RoutesSerializer, \
+    AirportsSerializer, SchedulesSerializer
 
 User = get_user_model()
 
@@ -178,3 +179,19 @@ class UserSessionTrackingViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         return UserSessionTracking.objects.filter(user=self.request.user).order_by('-login_time')
+
+
+class AirportsViewSet(viewsets.ModelViewSet):
+    queryset = Airports.objects.all()
+    serializer_class = AirportsSerializer
+
+
+class RoutesViewSet(viewsets.ModelViewSet):
+    queryset = Routes.objects.all()
+    serializer_class = RoutesSerializer
+
+
+class SchedulesViewSet(viewsets.ModelViewSet):
+    queryset = Schedules.objects.all()
+    serializer_class = SchedulesSerializer
+    permission_classes = [IsAuthenticated]
