@@ -59,27 +59,29 @@ class UserSessionTrackingSerializer(serializers.ModelSerializer):
 class AirportsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Airports
-        fields = ['id', 'name', 'iatacode']
+        fields = '__all__'
 
 
 class AircraftsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Aircrafts
-        fields = ['id', 'name', 'makemodel']
+        fields = '__all__'
 
 
 class SchedulesSerializer(serializers.ModelSerializer):
-    from_airport = AirportsSerializer(source='route.departure_airport', read_only=True)
-    to_airport = AirportsSerializer(source='route.arrival_airport', read_only=True)
-    aircraft = AircraftsSerializer(read_only=True)
+    business_price = serializers.SerializerMethodField()
+    first_class_price = serializers.SerializerMethodField()
 
     class Meta:
         model = Schedules
-        fields = [
-            'id', 'date', 'time', 'flight_number', 'economy_price',
-            'business_price', 'first_class_price', 'confirmed', 'from_airport',
-            'to_airport', 'aircraft'
-        ]
+        fields = '__all__'
+
+    def get_business_price(self, obj):
+        return float(obj.economy_price) * 1.35
+
+    def get_first_class_price(self, obj):
+        business_price = self.get_business_price(obj)
+        return business_price * 1.30
 
 
 class RoutesSerializer(serializers.ModelSerializer):

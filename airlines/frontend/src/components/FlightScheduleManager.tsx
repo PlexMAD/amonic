@@ -42,8 +42,11 @@ const FlightScheduleManagement: React.FC = () => {
   }, []);
 
   const fetchFlights = async () => {
+    const accessToken = localStorage.getItem('access_token');
     try {
-      const response = await axios.get('/api/schedules/');
+      const response = await axios.get('http://127.0.0.1:8000/api/schedules/', {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
       setFlights(response.data);
     } catch (error) {
       console.error("Error fetching flight schedules", error);
@@ -70,8 +73,11 @@ const FlightScheduleManagement: React.FC = () => {
   };
 
   const cancelFlight = async (flightId: number) => {
+    const accessToken = localStorage.getItem('access_token');
     try {
-      await axios.patch(`/api/schedules/${flightId}/`, { confirmed: false });
+      await axios.patch(`http://127.0.0.1:8000/api/schedules/${flightId}/`, { confirmed: false }, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
       setFlights((prevFlights) =>
         prevFlights.map((flight) =>
           flight.id === flightId ? { ...flight, confirmed: false } : flight
