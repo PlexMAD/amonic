@@ -85,27 +85,27 @@ const UserPanel: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>Панель пользователя</h1>
-      <p>Текущая сессия: {currentSessionTime}</p>
-      <table>
+    <div className="user-panel">
+      <h1 className="user-panel__title">Панель пользователя</h1>
+      <p className="user-panel__session-time">Текущая сессия: {currentSessionTime}</p>
+      <table className="user-panel__table">
         <thead>
           <tr>
-            <th>Дата</th>
-            <th>Время входа</th>
-            <th>Время выхода</th>
-            <th>Время нахождения</th>
-            <th>Причина неудачного выхода</th>
+            <th className="user-panel__header">Дата</th>
+            <th className="user-panel__header">Время входа</th>
+            <th className="user-panel__header">Время выхода</th>
+            <th className="user-panel__header">Время нахождения</th>
+            <th className="user-panel__header">Причина неудачного выхода</th>
           </tr>
         </thead>
         <tbody>
           {sessions.map(session => (
-            <tr key={session.id}>
-              <td>{new Date(session.login_time).toLocaleDateString()}</td>
-              <td>{new Date(session.login_time).toLocaleTimeString()}</td>
-              <td>{session.logout_time ? new Date(session.logout_time).toLocaleTimeString() : 'Неизвестно'}</td>
-              <td>{session.duration ? session.duration : 'Неизвестно'}</td>
-              <td style={{ color: session.logout_reason ? 'red' : 'black' }}>
+            <tr key={session.id} className="user-panel__row">
+              <td className="user-panel__cell">{new Date(session.login_time).toLocaleDateString()}</td>
+              <td className="user-panel__cell">{new Date(session.login_time).toLocaleTimeString()}</td>
+              <td className="user-panel__cell">{session.logout_time ? new Date(session.logout_time).toLocaleTimeString() : 'Неизвестно'}</td>
+              <td className="user-panel__cell">{session.duration ? session.duration : 'Неизвестно'}</td>
+              <td className="user-panel__cell" style={{ color: session.logout_reason ? 'red' : 'black' }}>
                 {session.logout_reason || 'Выход удачен/Ошибка необработана'}
               </td>
             </tr>
@@ -113,8 +113,10 @@ const UserPanel: React.FC = () => {
         </tbody>
       </table>
 
-      <button onClick={handleLogout}>Выйти</button>
-      <button onClick={handleTestError}>Сгенерировать ошибку</button>
+      <div className="user-panel__buttons">
+        <button className="user-panel__button" onClick={handleLogout}>Выйти</button>
+        <button className="user-panel__button" onClick={handleTestError}>Сгенерировать ошибку</button>
+      </div>
     </div>
   );
 };
