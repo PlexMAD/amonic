@@ -28,6 +28,7 @@ interface Flight {
   business_price: number;
   first_class_price: number;
   confirmed: boolean;
+  aircraft_id?: number; 
 }
 
 const FlightScheduleManagement: React.FC = () => {
@@ -41,7 +42,7 @@ const FlightScheduleManagement: React.FC = () => {
     date: '',
     flightNumber: ''
   });
-  const [sortBy, setSortBy] = useState<'date' | 'price'>('date');
+  const [sortBy, setSortBy] = useState<'date' | 'price' | 'status'>('date');
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
 
@@ -100,8 +101,10 @@ const FlightScheduleManagement: React.FC = () => {
 
     if (sortBy === 'date') {
       filteredFlights.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    } else {
+    } else if (sortBy === 'price') {
       filteredFlights.sort((a, b) => a.economy_price - b.economy_price);
+    } else if (sortBy === 'status') {
+      filteredFlights.sort((a, b) => Number(b.confirmed) - Number(a.confirmed));
     }
 
     setFlights(filteredFlights);
@@ -125,6 +128,27 @@ const FlightScheduleManagement: React.FC = () => {
       );
     } catch (error) {
       console.error("Error cancelling flight", error);
+    }
+  };
+
+  const reactivateFlight = async (flightId: number) => {
+    const accessToken = localStorage.getItem('access_token');
+    try {
+      await axios.patch(`http://127.0.0.1:8000/api/update_schedule/${flightId}/`, { confirmed: true }, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      setFlights((prevFlights) =>
+        prevFlights.map((flight) =>
+          flight.id === flightId ? { ...flight, confirmed: true } : flight
+        )
+      );
+      setOriginalFlights((prevFlights) =>
+        prevFlights.map((flight) =>
+          flight.id === flightId ? { ...flight, confirmed: true } : flight
+        )
+      );
+    } catch (error) {
+      console.error("Error reactivating flight", error);
     }
   };
 
@@ -178,16 +202,13 @@ const FlightScheduleManagement: React.FC = () => {
         <select
           value={filters.arrivalAirport}
           onChange={(e) => setFilters({ ...filters, arrivalAirport: e.target.value })}
-          disabled={!filters.departureAirport} // Disable if no departure airport is selected
         >
           <option value="">Select Arrival Airport</option>
-          {airports
-            .filter((airport) => airport.id !== parseInt(filters.departureAirport)) // Filter out the selected departure airport
-            .map((airport) => (
-              <option key={airport.id} value={airport.id}>
-                {airport.name}
-              </option>
-            ))}
+          {airports.map((airport) => (
+            <option key={airport.id} value={airport.id}>
+              {airport.name}
+            </option>
+          ))}
         </select>
 
         <input
@@ -201,9 +222,10 @@ const FlightScheduleManagement: React.FC = () => {
           value={filters.flightNumber}
           onChange={(e) => setFilters({ ...filters, flightNumber: e.target.value })}
         />
-        <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'date' | 'price')}>
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'date' | 'price' | 'status')}>
           <option value="date">Sort by Date</option>
           <option value="price">Sort by Price</option>
+          <option value="status">Sort by Status</option>
         </select>
         <button onClick={applyFilters}>Apply Filters</button>
       </div>
@@ -239,7 +261,11 @@ const FlightScheduleManagement: React.FC = () => {
               <td>{flight.confirmed ? 'Confirmed' : 'Cancelled'}</td>
               <td>
                 <button onClick={() => handleEditFlight(flight)}>Edit</button>
-                <button onClick={() => cancelFlight(flight.id)} disabled={!flight.confirmed}>Cancel</button>
+                {flight.confirmed ? (
+                  <button onClick={() => cancelFlight(flight.id)}>Cancel</button>
+                ) : (
+                  <button onClick={() => reactivateFlight(flight.id)}>Reactivate</button>
+                )}
               </td>
             </tr>
           ))}
@@ -248,25 +274,28 @@ const FlightScheduleManagement: React.FC = () => {
 
       {showModal && selectedFlight && (
         <div className="modal">
-          <div className="modal-content">
-            <h3>Edit Flight</h3>
-            <label>Date:</label>
-            <input type="date" name="date" value={selectedFlight.date} onChange={handleInputChange} />
-
-            <label>Time:</label>
-            <input type="time" name="time" value={selectedFlight.time} onChange={handleInputChange} />
-
-            <label>Economy Price:</label>
-            <input
-              type="number"
-              name="economy_price"
-              value={selectedFlight.economy_price}
-              onChange={handleInputChange}
-            />
-
-            <button onClick={handleSave}>Save</button>
-            <button onClick={handleCloseModal}>Cancel</button>
-          </div>
+          <h2>Edit Flight</h2>
+          <input
+            type="date"
+            name="date"
+            value={selectedFlight.date}
+            onChange={handleInputChange}
+          />
+          <input
+            type="time"
+            name="time"
+            value={selectedFlight.time}
+            onChange={handleInputChange}
+          />
+          <label>Economy Price:</label>
+          <input
+            type="number"
+            name="economy_price"
+            value={selectedFlight.economy_price}
+            onChange={handleInputChange}
+          />
+          <button onClick={handleSave}>Save</button>
+          <button onClick={handleCloseModal}>Close</button>
         </div>
       )}
     </div>

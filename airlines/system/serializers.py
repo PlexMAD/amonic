@@ -75,7 +75,6 @@ class SchedulesSerializer(serializers.ModelSerializer):
     to_airport = AirportsSerializer(source='route.arrival_airport', read_only=True)
     aircraft = AircraftsSerializer(read_only=True)
 
-    # Поле для выбора существующего объекта при создании/редактировании
     aircraft_id = serializers.PrimaryKeyRelatedField(queryset=Aircrafts.objects.all(), source='aircraft',
                                                      write_only=True)
 
@@ -84,12 +83,11 @@ class SchedulesSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_business_price(self, obj):
-        return float(obj.economy_price) * 1.35
+        return int(float(obj.economy_price) * 1.35)
 
     def get_first_class_price(self, obj):
         business_price = self.get_business_price(obj)
-        return business_price * 1.30
-
+        return int(business_price * 1.30)
 
 
 class RoutesSerializer(serializers.ModelSerializer):
