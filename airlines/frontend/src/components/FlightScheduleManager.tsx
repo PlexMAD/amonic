@@ -185,13 +185,14 @@ const FlightScheduleManagement: React.FC = () => {
   };
 
   return (
-    <div>
-      <div>
+    <div className="flight-schedule-management">
+      <div className="flight-schedule-management__filters">
         <select
+          className="flight-schedule-management__select"
           value={filters.departureAirport}
           onChange={(e) => setFilters({ ...filters, departureAirport: e.target.value })}
         >
-          <option value="">Select Departure Airport</option>
+          <option value="">Выберите аэропорт отправления</option>
           {airports.map((airport) => (
             <option key={airport.id} value={airport.id}>
               {airport.name}
@@ -200,10 +201,11 @@ const FlightScheduleManagement: React.FC = () => {
         </select>
 
         <select
+          className="flight-schedule-management__select"
           value={filters.arrivalAirport}
           onChange={(e) => setFilters({ ...filters, arrivalAirport: e.target.value })}
         >
-          <option value="">Select Arrival Airport</option>
+          <option value="">Выберите аэропорт назначения</option>
           {airports.map((airport) => (
             <option key={airport.id} value={airport.id}>
               {airport.name}
@@ -212,43 +214,45 @@ const FlightScheduleManagement: React.FC = () => {
         </select>
 
         <input
+          className="flight-schedule-management__input"
           type="date"
           value={filters.date}
           onChange={(e) => setFilters({ ...filters, date: e.target.value })}
         />
         <input
+          className="flight-schedule-management__input"
           type="text"
-          placeholder="Flight Number"
+          placeholder="Номер рейса"
           value={filters.flightNumber}
           onChange={(e) => setFilters({ ...filters, flightNumber: e.target.value })}
         />
-        <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'date' | 'price' | 'status')}>
-          <option value="date">Sort by Date</option>
-          <option value="price">Sort by Price</option>
-          <option value="status">Sort by Status</option>
+        <select className="flight-schedule-management__select" value={sortBy} onChange={(e) => setSortBy(e.target.value as 'date' | 'price' | 'status')}>
+          <option value="date">Сортировать по дате</option>
+          <option value="price">Сортировать по цене</option>
+          <option value="status">Сортировать по статусу</option>
         </select>
-        <button onClick={applyFilters}>Apply Filters</button>
+        <button className="flight-schedule-management__button" onClick={applyFilters}>Применить фильтры</button>
       </div>
 
-      <table>
+      <table className="flight-schedule-management__table">
         <thead>
-          <tr>
-            <th>Date</th>
-            <th>Time</th>
-            <th>From</th>
-            <th>To</th>
-            <th>Flight Number</th>
-            <th>Aircraft</th>
-            <th>Economy Price</th>
-            <th>Business Price</th>
-            <th>First Class Price</th>
-            <th>Status</th>
-            <th>Actions</th>
+          <tr className="flight-schedule-management__table-header">
+            <th>Дата</th>
+            <th>Время</th>
+            <th>Откуда</th>
+            <th>Куда</th>
+            <th>Номер рейса</th>
+            <th>Самолет</th>
+            <th>Цена (эконом)</th>
+            <th>Цена (бизнес)</th>
+            <th>Цена (первый класс)</th>
+            <th>Статус</th>
+            <th>Действия</th>
           </tr>
         </thead>
         <tbody>
           {flights.map((flight) => (
-            <tr key={flight.id} style={{ backgroundColor: !flight.confirmed ? '#f8d7da' : 'transparent' }}>
+            <tr key={flight.id} className={`flight-schedule-management__table-row ${!flight.confirmed ? 'flight-schedule-management__table-row--cancelled' : ''}`}>
               <td>{flight.date}</td>
               <td>{flight.time}</td>
               <td>{flight.from_airport.name}</td>
@@ -258,13 +262,13 @@ const FlightScheduleManagement: React.FC = () => {
               <td>{flight.economy_price}</td>
               <td>{flight.business_price}</td>
               <td>{flight.first_class_price}</td>
-              <td>{flight.confirmed ? 'Confirmed' : 'Cancelled'}</td>
+              <td>{flight.confirmed ? 'Подтверждено' : 'Отменено'}</td>
               <td>
-                <button onClick={() => handleEditFlight(flight)}>Edit</button>
+                <button className="flight-schedule-management__button" onClick={() => handleEditFlight(flight)}>Редактировать</button>
                 {flight.confirmed ? (
-                  <button onClick={() => cancelFlight(flight.id)}>Cancel</button>
+                  <button className="flight-schedule-management__button" onClick={() => cancelFlight(flight.id)}>Отменить</button>
                 ) : (
-                  <button onClick={() => reactivateFlight(flight.id)}>Reactivate</button>
+                  <button className="flight-schedule-management__button" onClick={() => reactivateFlight(flight.id)}>Реактивировать</button>
                 )}
               </td>
             </tr>
@@ -273,29 +277,32 @@ const FlightScheduleManagement: React.FC = () => {
       </table>
 
       {showModal && selectedFlight && (
-        <div className="modal">
-          <h2>Edit Flight</h2>
+        <div className="flight-schedule-management__modal">
+          <h2 className="flight-schedule-management__modal-title">Редактировать рейс</h2>
           <input
+            className="flight-schedule-management__modal-input"
             type="date"
             name="date"
             value={selectedFlight.date}
             onChange={handleInputChange}
           />
           <input
+            className="flight-schedule-management__modal-input"
             type="time"
             name="time"
             value={selectedFlight.time}
             onChange={handleInputChange}
           />
-          <label>Economy Price:</label>
+          <label className="flight-schedule-management__modal-label">Цена (эконом):</label>
           <input
+            className="flight-schedule-management__modal-input"
             type="number"
             name="economy_price"
             value={selectedFlight.economy_price}
             onChange={handleInputChange}
           />
-          <button onClick={handleSave}>Save</button>
-          <button onClick={handleCloseModal}>Close</button>
+          <button className="flight-schedule-management__modal-button" onClick={handleSave}>Сохранить</button>
+          <button className="flight-schedule-management__modal-button" onClick={handleCloseModal}>Закрыть</button>
         </div>
       )}
     </div>

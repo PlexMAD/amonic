@@ -160,10 +160,10 @@ const AdminPanel = () => {
   
 
   return (
-    <div>
-      <h1>Админ панель</h1>
-      <label>Офис: </label>
-      <select value={selectedOffice} onChange={(e) => handleOfficeChange(e.target.value)}>
+    <div className="admin-panel">
+      <h1 className="admin-panel__title">Админ панель</h1>
+      <label className="admin-panel__label">Офис: </label>
+      <select className="admin-panel__select" value={selectedOffice} onChange={(e) => handleOfficeChange(e.target.value)}>
         <option value="Все офисы">Все офисы</option>
         {offices.map((officeName, index) => (
           <option key={index} value={officeName}>
@@ -172,7 +172,7 @@ const AdminPanel = () => {
         ))}
       </select>
 
-      <button onClick={() => {
+      <button className="admin-panel__button" onClick={() => {
           setUserData(null);
           setShowModal(true);
           setNewUser({
@@ -186,12 +186,12 @@ const AdminPanel = () => {
         }}>
         Добавить пользователя
       </button>
-      <button onClick={handleLogout}>Выйти</button>
-      <button onClick={handleTestError}>Сгенерировать ошибку</button>
+      <button className="admin-panel__button" onClick={handleLogout}>Выйти</button>
+      <button className="admin-panel__button" onClick={handleTestError}>Сгенерировать ошибку</button>
 
-      <table>
+      <table className="admin-panel__table">
         <thead>
-          <tr>
+          <tr className="admin-panel__table-header">
             <th>Имя</th>
             <th>Фамилия</th>
             <th>Email</th>
@@ -203,15 +203,15 @@ const AdminPanel = () => {
         </thead>
         <tbody>
           {filteredUsers.map(user => (
-            <tr key={user.id} style={getRowStyle(user)}>
-              <td>{user.firstname}</td>
-              <td>{user.lastname}</td>
-              <td>{user.email}</td>
-              <td>{calculateAge(user.birthdate)}</td>
-              <td>{user.roleid === 1 ? 'Администратор' : 'Пользователь'}</td>
-              <td>{user.office_name}</td>
-              <td>
-                <button onClick={() => handleEditUser(user)}>Редактировать</button>
+            <tr key={user.id} style={getRowStyle(user)} className="admin-panel__table-row">
+              <td className="admin-panel__table-cell">{user.firstname}</td>
+              <td className="admin-panel__table-cell">{user.lastname}</td>
+              <td className="admin-panel__table-cell">{user.email}</td>
+              <td className="admin-panel__table-cell">{calculateAge(user.birthdate)}</td>
+              <td className="admin-panel__table-cell">{user.roleid === 1 ? 'Администратор' : 'Пользователь'}</td>
+              <td className="admin-panel__table-cell">{user.office_name}</td>
+              <td className="admin-panel__table-cell">
+                <button className="admin-panel__edit-button" onClick={() => handleEditUser(user)}>Редактировать</button>
               </td>
             </tr>
           ))}
@@ -219,48 +219,53 @@ const AdminPanel = () => {
       </table>
 
       {showModal && (
-        <div className="modal">
-          <h2>{userData ? 'Редактировать пользователя' : 'Добавить пользователя'}</h2>
-          <form onSubmit={(e) => {
+        <div className="modal admin-panel__modal">
+          <h2 className="admin-panel__modal-title">{userData ? 'Редактировать пользователя' : 'Добавить пользователя'}</h2>
+          <form className="admin-panel__form" onSubmit={(e) => {
             e.preventDefault();
             userData ? handleSaveUser() : handleAddUser();
           }}>
-            <label>Email:</label>
+            <label className="admin-panel__form-label">Email:</label>
             <input
               type="email"
+              className="admin-panel__form-input"
               value={userData?.email || newUser.email}
               onChange={(e) => userData 
                 ? setUserData({ ...userData, email: e.target.value }) 
                 : setNewUser({ ...newUser, email: e.target.value })}
               required
             />
-            <label>Имя:</label>
+            <label className="admin-panel__form-label">Имя:</label>
             <input
               type="text"
+              className="admin-panel__form-input"
               value={userData?.firstname || newUser.firstname}
               onChange={(e) => userData 
                 ? setUserData({ ...userData, firstname: e.target.value }) 
                 : setNewUser({ ...newUser, firstname: e.target.value })}
               required
             />
-            <label>Фамилия:</label>
+            <label className="admin-panel__form-label">Фамилия:</label>
             <input
               type="text"
+              className="admin-panel__form-input"
               value={userData?.lastname || newUser.lastname}
               onChange={(e) => userData 
                 ? setUserData({ ...userData, lastname: e.target.value }) 
                 : setNewUser({ ...newUser, lastname: e.target.value })}
               required
             />
-            <label>Пароль:</label>
+            <label className="admin-panel__form-label">Пароль:</label>
             <input
               type="password"
+              className="admin-panel__form-input"
               value={newUser.password}
               onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
               required
             />
-            <label>Офис:</label>
+            <label className="admin-panel__form-label">Офис:</label>
             <select
+              className="admin-panel__form-select"
               value={userData?.office_name || newUser.office_name}
               onChange={(e) => userData 
                 ? setUserData({ ...userData, office_name: e.target.value }) 
@@ -274,9 +279,10 @@ const AdminPanel = () => {
                 </option>
               ))}
             </select>
-            <label>Дата рождения:</label>
+            <label className="admin-panel__form-label">Дата рождения:</label>
             <input
               type="date"
+              className="admin-panel__form-input"
               value={userData?.birthdate || newUser.birthdate}
               onChange={(e) => userData 
                 ? setUserData({ ...userData, birthdate: e.target.value }) 
@@ -285,8 +291,9 @@ const AdminPanel = () => {
             />
             {userData && (
               <>
-                <label>Роль:</label>
+                <label className="admin-panel__form-label">Роль:</label>
                 <select
+                  className="admin-panel__form-select"
                   value={userData.roleid}
                   onChange={(e) => userData && setUserData({ ...userData, roleid: Number(e.target.value) })}
                   required
@@ -294,8 +301,9 @@ const AdminPanel = () => {
                   <option value="1">Администратор</option>
                   <option value="2">Пользователь</option>
                 </select>
-                <label>Статус активности:</label>
+                <label className="admin-panel__form-label">Статус активности:</label>
                 <select
+                  className="admin-panel__form-select"
                   value={userData.active}
                   onChange={(e) => userData && setUserData({ ...userData, active: Number(e.target.value) })}
                   required
@@ -305,8 +313,8 @@ const AdminPanel = () => {
                 </select>
               </>
             )}
-            <button type="submit">{userData ? 'Сохранить' : 'Добавить'}</button>
-            <button type="button" onClick={() => setShowModal(false)}>Закрыть</button>
+            <button type="submit" className="admin-panel__form-submit-button">{userData ? 'Сохранить' : 'Добавить'}</button>
+            <button type="button" className="admin-panel__form-close-button" onClick={() => setShowModal(false)}>Закрыть</button>
           </form>
         </div>
       )}
