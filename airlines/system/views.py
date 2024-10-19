@@ -6,9 +6,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
-from .models import Offices, Roles, Airports, Routes, Schedules
+from .models import Offices, Roles, Airports, Routes, Schedules, Aircrafts
 from .serializers import UsersSerializer, OfficesSerializer, UserSessionTrackingSerializer, RoutesSerializer, \
-    AirportsSerializer, SchedulesSerializer
+    AirportsSerializer, SchedulesSerializer, AircraftsSerializer
 
 User = get_user_model()
 
@@ -186,6 +186,11 @@ class AirportsViewSet(viewsets.ModelViewSet):
     serializer_class = AirportsSerializer
 
 
+class AicraftsViewSet(viewsets.ModelViewSet):
+    queryset = Aircrafts.objects.all()
+    serializer_class = AircraftsSerializer
+
+
 class RoutesViewSet(viewsets.ModelViewSet):
     queryset = Routes.objects.all()
     serializer_class = RoutesSerializer
@@ -195,3 +200,17 @@ class SchedulesViewSet(viewsets.ModelViewSet):
     queryset = Schedules.objects.all()
     serializer_class = SchedulesSerializer
 
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_schedule(request, schedule_id):
+    try:
+        flight = Schedules.objects.get(pk=schedule_id)
+    except Schedules.DoesNotExist:
+        return Response({'error': 'Flight not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = SchedulesSerializer(flight, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

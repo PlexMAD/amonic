@@ -11,6 +11,9 @@ interface Aircraft {
   id: number;
   name: string;
   make_model: string;
+  total_seats: number;
+  economy_seats: number;
+  business_seats: number;
 }
 
 interface Flight {
@@ -29,6 +32,9 @@ interface Flight {
 
 const FlightScheduleManagement: React.FC = () => {
   const [flights, setFlights] = useState<Flight[]>([]);
+  const [originalFlights, setOriginalFlights] = useState<Flight[]>([]);
+  const [airports, setAirports] = useState<Airport[]>([]);
+  const [aircrafts, setAircrafts] = useState<Aircraft[]>([]);
   const [filters, setFilters] = useState({
     departureAirport: '',
     arrivalAirport: '',
@@ -36,9 +42,13 @@ const FlightScheduleManagement: React.FC = () => {
     flightNumber: ''
   });
   const [sortBy, setSortBy] = useState<'date' | 'price'>('date');
+  const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   useEffect(() => {
     fetchFlights();
+    fetchAirports();
+    fetchAircrafts();
   }, []);
 
   const fetchFlights = async () => {
@@ -48,15 +58,40 @@ const FlightScheduleManagement: React.FC = () => {
         headers: { Authorization: `Bearer ${accessToken}` }
       });
       setFlights(response.data);
+      setOriginalFlights(response.data);
     } catch (error) {
       console.error("Error fetching flight schedules", error);
     }
   };
 
+  const fetchAirports = async () => {
+    const accessToken = localStorage.getItem('access_token');
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/api/airports/', {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      setAirports(response.data);
+    } catch (error) {
+      console.error("Error fetching airports", error);
+    }
+  };
+
+  const fetchAircrafts = async () => {
+    const accessToken = localStorage.getItem('access_token');
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/api/aircrafts/', {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      setAircrafts(response.data);
+    } catch (error) {
+      console.error("Error fetching aircrafts", error);
+    }
+  };
+
   const applyFilters = () => {
-    const filteredFlights = flights.filter((flight) => {
-      const matchesDeparture = filters.departureAirport === '' || flight.from_airport.name.toLowerCase().includes(filters.departureAirport.toLowerCase());
-      const matchesArrival = filters.arrivalAirport === '' || flight.to_airport.name.toLowerCase().includes(filters.arrivalAirport.toLowerCase());
+    const filteredFlights = originalFlights.filter((flight) => {
+      const matchesDeparture = filters.departureAirport === '' || flight.from_airport.id === parseInt(filters.departureAirport);
+      const matchesArrival = filters.arrivalAirport === '' || flight.to_airport.id === parseInt(filters.arrivalAirport);
       const matchesDate = filters.date === '' || flight.date === filters.date;
       const matchesFlightNumber = filters.flightNumber === '' || flight.flight_number.includes(filters.flightNumber);
 
@@ -75,10 +110,15 @@ const FlightScheduleManagement: React.FC = () => {
   const cancelFlight = async (flightId: number) => {
     const accessToken = localStorage.getItem('access_token');
     try {
-      await axios.patch(`http://127.0.0.1:8000/api/schedules/${flightId}/`, { confirmed: false }, {
+      await axios.patch(`http://127.0.0.1:8000/api/update_schedule/${flightId}/`, { confirmed: false }, {
         headers: { Authorization: `Bearer ${accessToken}` }
       });
       setFlights((prevFlights) =>
+        prevFlights.map((flight) =>
+          flight.id === flightId ? { ...flight, confirmed: false } : flight
+        )
+      );
+      setOriginalFlights((prevFlights) =>
         prevFlights.map((flight) =>
           flight.id === flightId ? { ...flight, confirmed: false } : flight
         )
@@ -88,25 +128,68 @@ const FlightScheduleManagement: React.FC = () => {
     }
   };
 
-  const editFlight = (flightId: number) => {
-    // Логика для редактирования рейса, например, переход на страницу редактирования
+  const handleEditFlight = (flight: Flight) => {
+    setSelectedFlight(flight);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedFlight(null);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (selectedFlight) {
+      setSelectedFlight({ ...selectedFlight, [name]: value });
+    }
+  };
+
+  const handleSave = async () => {
+    const accessToken = localStorage.getItem('access_token');
+    if (selectedFlight) {
+      try {
+        await axios.patch(`http://127.0.0.1:8000/api/update_schedule/${selectedFlight.id}/`, selectedFlight, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        fetchFlights();
+        handleCloseModal();
+      } catch (error) {
+        console.error("Error updating flight", error);
+      }
+    }
   };
 
   return (
     <div>
       <div>
-        <input
-          type="text"
-          placeholder="From Airport"
+        <select
           value={filters.departureAirport}
           onChange={(e) => setFilters({ ...filters, departureAirport: e.target.value })}
-        />
-        <input
-          type="text"
-          placeholder="To Airport"
+        >
+          <option value="">Select Departure Airport</option>
+          {airports.map((airport) => (
+            <option key={airport.id} value={airport.id}>
+              {airport.name}
+            </option>
+          ))}
+        </select>
+
+        <select
           value={filters.arrivalAirport}
           onChange={(e) => setFilters({ ...filters, arrivalAirport: e.target.value })}
-        />
+          disabled={!filters.departureAirport} // Disable if no departure airport is selected
+        >
+          <option value="">Select Arrival Airport</option>
+          {airports
+            .filter((airport) => airport.id !== parseInt(filters.departureAirport)) // Filter out the selected departure airport
+            .map((airport) => (
+              <option key={airport.id} value={airport.id}>
+                {airport.name}
+              </option>
+            ))}
+        </select>
+
         <input
           type="date"
           value={filters.date}
@@ -155,13 +238,37 @@ const FlightScheduleManagement: React.FC = () => {
               <td>{flight.first_class_price}</td>
               <td>{flight.confirmed ? 'Confirmed' : 'Cancelled'}</td>
               <td>
-                <button onClick={() => editFlight(flight.id)}>Edit</button>
+                <button onClick={() => handleEditFlight(flight)}>Edit</button>
                 <button onClick={() => cancelFlight(flight.id)} disabled={!flight.confirmed}>Cancel</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {showModal && selectedFlight && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Edit Flight</h3>
+            <label>Date:</label>
+            <input type="date" name="date" value={selectedFlight.date} onChange={handleInputChange} />
+
+            <label>Time:</label>
+            <input type="time" name="time" value={selectedFlight.time} onChange={handleInputChange} />
+
+            <label>Economy Price:</label>
+            <input
+              type="number"
+              name="economy_price"
+              value={selectedFlight.economy_price}
+              onChange={handleInputChange}
+            />
+
+            <button onClick={handleSave}>Save</button>
+            <button onClick={handleCloseModal}>Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

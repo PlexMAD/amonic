@@ -17,6 +17,7 @@ router.register(r'user_sessions', UserSessionTrackingViewSet, basename='user_ses
 router.register(r'airports', AirportsViewSet, basename='airports')
 router.register(r'routes', RoutesViewSet, basename='routes')
 router.register(r'schedules', SchedulesViewSet, basename='schedules')
+router.register(r'aircrafts', AicraftsViewSet, basename='aircrafts')
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -27,5 +28,6 @@ urlpatterns = [
     path('add_user/', add_user, name='add_user'),
     path('update_user/<int:user_id>/', update_user, name='update_user'),
     path('logout/', logout_view, name='logout'),
-    path('test_error/', test_error, name='test_error')
+    path('test_error/', test_error, name='test_error'),
+    path('update_schedule/<int:schedule_id>/', update_schedule, name='update_schedule'),
 ]

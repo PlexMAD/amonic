@@ -71,6 +71,13 @@ class AircraftsSerializer(serializers.ModelSerializer):
 class SchedulesSerializer(serializers.ModelSerializer):
     business_price = serializers.SerializerMethodField()
     first_class_price = serializers.SerializerMethodField()
+    from_airport = AirportsSerializer(source='route.departure_airport', read_only=True)
+    to_airport = AirportsSerializer(source='route.arrival_airport', read_only=True)
+    aircraft = AircraftsSerializer(read_only=True)
+
+    # Поле для выбора существующего объекта при создании/редактировании
+    aircraft_id = serializers.PrimaryKeyRelatedField(queryset=Aircrafts.objects.all(), source='aircraft',
+                                                     write_only=True)
 
     class Meta:
         model = Schedules
@@ -82,6 +89,7 @@ class SchedulesSerializer(serializers.ModelSerializer):
     def get_first_class_price(self, obj):
         business_price = self.get_business_price(obj)
         return business_price * 1.30
+
 
 
 class RoutesSerializer(serializers.ModelSerializer):
