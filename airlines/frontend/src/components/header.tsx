@@ -6,11 +6,7 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
 
   const handleNavigateToUserPanel = () => {
-    navigate('/user-panel');
-  };
-
-  const handleNavigateToAdminPanel = () => {
-    navigate('/admin-panel');
+    navigate('/');
   };
 
   return (
@@ -20,7 +16,6 @@ const Header: React.FC = () => {
       </div>
       <div className="header__buttons">
         <button onClick={handleNavigateToUserPanel}>Пользовательская панель</button>
-        <button onClick={handleNavigateToAdminPanel}>Администраторская панель</button>
       </div>
     </header>
   );

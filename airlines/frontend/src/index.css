@@ -38,7 +38,14 @@ code {
 }
 
 .footer {
-  padding: 20px;
+  padding: 5px;
   text-align: center;
   background-color: #606060; /* Цвет фона подвала */
+  position: fixed;
+  bottom: 0px;
+  width: 100%;
+}
+
+.flight-schedule-management__table-row--cancelled {
+  background-color: rgba(255, 0, 0, 0.6);
 }
