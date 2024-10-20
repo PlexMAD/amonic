@@ -108,7 +108,7 @@ const FlightSearch = () => {
     };
     const handleConfirmBooking = () => {
         if (!selectedOutboundFlight) return;
-    
+
         const bookingData = {
             flight: selectedOutboundFlight.id,
             passengers: passengerList.map(passenger => ({
@@ -123,13 +123,13 @@ const FlightSearch = () => {
             cabintypeid: cabinType === 'economy' ? 1 : cabinType === 'business' ? 2 : 3,
             returnFlight: isRoundTrip && selectedReturnFlight ? selectedReturnFlight.id : null,
         };
-    
-        const token = localStorage.getItem('access_token'); 
-    
-        // Create an array to hold all booking requests
+
+        const token = localStorage.getItem('access_token');
+
+
         const bookingRequests = [];
-    
-        // Create request for outbound flight
+
+
         bookingRequests.push(
             axios.post('http://127.0.0.1:8000/api/create-ticket/', bookingData, {
                 headers: {
@@ -137,8 +137,8 @@ const FlightSearch = () => {
                 },
             })
         );
-    
-        // Create request for return flight if it's a round trip
+
+
         if (isRoundTrip && selectedReturnFlight) {
             const returnBookingData = {
                 flight: selectedReturnFlight.id,
@@ -152,9 +152,9 @@ const FlightSearch = () => {
                     email: passenger.email,
                 })),
                 cabintypeid: cabinType === 'economy' ? 1 : cabinType === 'business' ? 2 : 3,
-                returnFlight: null, // No return flight for return ticket
+                returnFlight: null,
             };
-    
+
             bookingRequests.push(
                 axios.post('http://127.0.0.1:8000/api/create-ticket/', returnBookingData, {
                     headers: {
@@ -163,8 +163,7 @@ const FlightSearch = () => {
                 })
             );
         }
-    
-        // Execute all booking requests concurrently
+
         Promise.all(bookingRequests)
             .then(responses => {
                 const bookingNumbers = responses.map(response => response.data.booking_number);

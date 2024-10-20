@@ -118,5 +118,4 @@ class TicketCreateSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         validated_data['userid'] = user
 
-
         return super().create(validated_data)
