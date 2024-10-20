@@ -325,16 +325,37 @@ code {
 }
 
 .admin-panel__modal {
-  background-color: white;
+  background-color: #fff8b5; 
   padding: 20px;
   border-radius: 10px;
-  width: 400px;
+  width: 500px; 
+  max-height: 80vh; 
+  overflow-y: auto; 
+  position: fixed;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+  z-index: 1001;
+  border: 2px solid black; 
+}
+.admin-panel__modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+.admin-panel__modal-title {
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: bold;
+  text-align: center;
+  background-color: #fff8b5;
 }
 
-.admin-panel__modal-title {
-  font-size: 20px;
-  margin-bottom: 20px;
-}
 
 .admin-panel__form-label {
   display: block;
@@ -343,9 +364,12 @@ code {
 
 .admin-panel__form-input,
 .admin-panel__form-select {
-  width: 100%;
-  padding: 5px;
-  margin-bottom: 20px;
+  width: calc(100% - 20px); 
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid black;
+  border-radius: 5px;
+  background-color: white;
 }
 
 .admin-panel__form-submit-button {
@@ -354,6 +378,7 @@ code {
   color: white;
   border: none;
   cursor: pointer;
+  margin-right: 10px;
 }
 
 .admin-panel__form-close-button {
@@ -368,3 +393,133 @@ code {
   background-color: #d32f2f;
 }
 /* ADMINPANEL */
+/* FlightScheduleManager */
+.flight-schedule-management {
+  background-color: #fff8b5; /* Светло-желтый фон */
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  padding-bottom: 100px; /* Отступ снизу для футера */
+  position: relative;
+}
+
+.flight-schedule-management__filters {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.flight-schedule-management__input,
+.flight-schedule-management__select {
+  padding: 10px;
+  border: 2px solid black;
+  border-radius: 5px;
+}
+.flight-schedule-management__button--edit {
+  background-color: #4CAF50;
+  color: white;
+}
+.flight-schedule-management__button--edit:hover {
+  background-color: #45a049;
+}
+.flight-schedule-management__button--cancel {
+  background-color: #f44336; /* Красный цвет */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+.flight-schedule-management__button--cancel:disabled {
+  background-color: grey; /* Цвет для неактивной кнопки */
+  cursor: not-allowed; /* Запрещающий курсор */
+}
+.flight-schedule-management__button--cancel:hover:enabled {
+  background-color: #d32f2f; /* Темнее при наведении */
+}
+.flight-schedule-management__button--cancel:hover {
+  background-color: #d32f2f;
+}
+.flight-schedule-management__button--reactivate {
+  background-color: #FFA500;
+  color: white;
+}
+.flight-schedule-management__button--reactivate:hover {
+  background-color: #FF8C00;
+}
+.flight-schedule-management__button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.flight-schedule-management__button:hover {
+  background-color: #45a049;
+}
+
+.flight-schedule-management__table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.flight-schedule-management__table-header {
+  background-color: #b7b7b7;
+  font-weight: bold;
+  border-bottom: 2px solid black;
+}
+
+.flight-schedule-management__table-row {
+  background-color: #fff8b5;
+  border-bottom: 1px solid black;
+}
+
+.flight-schedule-management__table-row--cancelled {
+  background-color: #f28b82; /* Красный фон для отмененных рейсов */
+}
+
+.flight-schedule-management__table td,
+.flight-schedule-management__table th {
+  padding: 10px;
+  text-align: center;
+  border: 1px solid black;
+}
+
+.flight-schedule-management__modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 50px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.flight-schedule-management__modal-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 2px solid black;
+  border-radius: 5px;
+}
+
+.flight-schedule-management__modal-button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.flight-schedule-management__modal-button:hover {
+  background-color: #45a049;
+}
+/* FlightScheduleManager */
