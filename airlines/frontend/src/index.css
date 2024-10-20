@@ -5,6 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
 }
 
 code {
@@ -49,7 +50,7 @@ code {
   position: fixed;
   bottom: 0px;
   width: 100%;
-  display: none;
+  
 }
 
 .flight-schedule-management__table-row--cancelled {
@@ -162,6 +163,7 @@ code {
 .user-panel__table {
   width: 100%;
   border-collapse: collapse;
+  margin-bottom: 110px;
 }
 
 .user-panel__header {
@@ -524,3 +526,100 @@ code {
   background-color: #45a049;
 }
 /* FlightScheduleManager */
+/* FlightSearch */
+.flight-search {
+  max-width: 600px; /* Ограничиваем ширину формы */
+  margin: 40px auto; /* Центрирование и отступ сверху/снизу */
+  padding: 30px;
+  background-color: #ffffcc; /* Светло-желтый фон */
+  border-radius: 10px; /* Скругленные углы */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Легкая тень */
+}
+
+/* Заголовок */
+.flight-search__heading {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 24px;
+  color: #333;
+  font-weight: bold;
+}
+
+/* Стили формы */
+.flight-search__form {
+  display: flex;
+  flex-direction: column;
+}
+
+.flight-search__label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.flight-search__input,
+.flight-search__select {
+  padding: 10px;
+  border: 1px solid #000;
+  background-color: #ffffe0; /* Светло-желтый фон полей */
+  margin-bottom: 20px;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.flight-search__checkbox {
+  margin-right: 10px;
+}
+
+/* Кнопки */
+.flight-search__button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-bottom: 20px;
+  width: 100%;
+  text-align: center;
+}
+
+.flight-search__button:hover {
+  background-color: #45a049;
+}
+
+.flight-search__button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Таблицы */
+.flight-search__table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #ffffcc;
+  border-radius: 5px;
+}
+
+.flight-search__table-cell {
+  border: 1px solid #000;
+  padding: 12px;
+  text-align: left;
+  font-size: 16px;
+}
+
+.flight-search__table-row.red-row {
+  background-color: #ffcccc;
+}
+
+.flight-search__table-row.green-row {
+  background-color: #ccffcc;
+}
+
+.flight-search__table-row.yellow-row {
+  background-color: #ffffcc;
+}
+
+
+/* FlightSearch */
