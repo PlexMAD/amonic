@@ -108,7 +108,7 @@ const FlightSearch = () => {
     };
     const handleConfirmBooking = () => {
         if (!selectedOutboundFlight) return;
-
+    
         const bookingData = {
             flight: selectedOutboundFlight.id,
             passengers: passengerList.map(passenger => ({
@@ -123,16 +123,52 @@ const FlightSearch = () => {
             cabintypeid: cabinType === 'economy' ? 1 : cabinType === 'business' ? 2 : 3,
             returnFlight: isRoundTrip && selectedReturnFlight ? selectedReturnFlight.id : null,
         };
-
+    
         const token = localStorage.getItem('access_token'); 
-
-        axios.post('http://127.0.0.1:8000/api/create-ticket/', bookingData, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-        })
-            .then(response => {
-                alert('Бронирование успешно создано! Номер бронирования: ' + response.data.booking_number);
+    
+        // Create an array to hold all booking requests
+        const bookingRequests = [];
+    
+        // Create request for outbound flight
+        bookingRequests.push(
+            axios.post('http://127.0.0.1:8000/api/create-ticket/', bookingData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            })
+        );
+    
+        // Create request for return flight if it's a round trip
+        if (isRoundTrip && selectedReturnFlight) {
+            const returnBookingData = {
+                flight: selectedReturnFlight.id,
+                passengers: passengerList.map(passenger => ({
+                    first_name: passenger.firstName,
+                    last_name: passenger.lastName,
+                    birth_date: passenger.birthDate,
+                    passport_number: passenger.passportNumber,
+                    passport_country: passenger.passportCountry,
+                    phone: passenger.phone,
+                    email: passenger.email,
+                })),
+                cabintypeid: cabinType === 'economy' ? 1 : cabinType === 'business' ? 2 : 3,
+                returnFlight: null, // No return flight for return ticket
+            };
+    
+            bookingRequests.push(
+                axios.post('http://127.0.0.1:8000/api/create-ticket/', returnBookingData, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                })
+            );
+        }
+    
+        // Execute all booking requests concurrently
+        Promise.all(bookingRequests)
+            .then(responses => {
+                const bookingNumbers = responses.map(response => response.data.booking_number);
+                alert('Бронирование успешно создано! Номера бронирования: ' + bookingNumbers.join(', '));
                 setShowBookingForm(false);
             })
             .catch(error => {
