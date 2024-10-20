@@ -102,9 +102,6 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
       <button type="submit" className="login__button" disabled={!!timer}>
         {timer ? `Подождите ${timer}s` : 'Login'}
       </button>
-      <button type="button" className="login__button-exit" onClick={() => navigate('/')}>
-        Exit
-      </button>
     </div>
   </form>
 </div>

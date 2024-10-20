@@ -9,13 +9,23 @@ const Header: React.FC = () => {
     navigate('/');
   };
 
+  const handleNavigateToSchedule = () => {
+    navigate('/schedules'); // Добавьте путь для страницы расписаний
+  };
+
+  const handleNavigateToTickets = () => {
+    navigate('/tickets'); // Добавьте путь для страницы тикетов
+  };
+
   return (
     <header className="header">
       <div className="header__logo">
-        <img src="..\logo.svg" alt="" /> {/* Замените на путь к вашему логотипу */}
+        <img src="..\logo.svg" alt="Логотип" /> {/*путь к логотипу */}
       </div>
       <div className="header__buttons">
         <button onClick={handleNavigateToUserPanel}>Пользовательская панель</button>
+        <button onClick={handleNavigateToSchedule}>Расписание рейсов</button>
+        <button onClick={handleNavigateToTickets}>Тикеты</button>
       </div>
     </header>
   );
