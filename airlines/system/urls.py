@@ -19,6 +19,7 @@ router.register(r'routes', RoutesViewSet, basename='routes')
 router.register(r'schedules', SchedulesViewSet, basename='schedules')
 router.register(r'aircrafts', AicraftsViewSet, basename='aircrafts')
 router.register(r'tickets', TicketViewSet, basename='tickets')
+router.register(r'countries', CountriesViewSet, basename='countries')
 
 urlpatterns = [
     path('', include(router.urls)),

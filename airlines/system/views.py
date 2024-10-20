@@ -9,9 +9,9 @@ from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
-from .models import Offices, Roles, Airports, Routes, Schedules, Aircrafts, Tickets
+from .models import Offices, Roles, Airports, Routes, Schedules, Aircrafts, Tickets, Countries
 from .serializers import UsersSerializer, OfficesSerializer, UserSessionTrackingSerializer, RoutesSerializer, \
-    AirportsSerializer, SchedulesSerializer, AircraftsSerializer, TicketsSerializer
+    AirportsSerializer, SchedulesSerializer, AircraftsSerializer, TicketsSerializer, CountriesSerializer
 
 User = get_user_model()
 
@@ -75,6 +75,10 @@ class OfficeViewSet(viewsets.ModelViewSet):
     queryset = Offices.objects.all()
     serializer_class = OfficesSerializer
 
+
+class CountriesViewSet(viewsets.ModelViewSet):
+    queryset = Countries.objects.all()
+    serializer_class = CountriesSerializer
 
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]

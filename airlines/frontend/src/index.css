@@ -49,6 +49,7 @@ code {
   position: fixed;
   bottom: 0px;
   width: 100%;
+  display: none;
 }
 
 .flight-schedule-management__table-row--cancelled {
