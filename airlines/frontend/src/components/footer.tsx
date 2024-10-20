@@ -4,7 +4,7 @@ import '../index.css'; // Добавьте CSS файл для стилей
 const Footer: React.FC = () => {
   return (
     <footer className="footer">
-      <p>© 2024 Ваше название компании. Все права защищены.</p>
+      <p>©Команда 4 221-321</p>
     </footer>
   );
 };

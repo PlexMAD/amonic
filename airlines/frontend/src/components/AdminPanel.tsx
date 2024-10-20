@@ -186,9 +186,9 @@ const AdminPanel = () => {
         }}>
         Добавить пользователя
       </button>
-      <button className="admin-panel__button" onClick={handleLogout}>Выйти</button>
-      <button className="admin-panel__button" onClick={handleTestError}>Сгенерировать ошибку</button>
-
+      <button className="admin-panel__button_error" onClick={handleTestError}>Сгенерировать ошибку</button>
+      <button className="admin-panel__button_exit" onClick={handleLogout}>Выйти</button>
+      
       <table className="admin-panel__table">
         <thead>
           <tr className="admin-panel__table-header">

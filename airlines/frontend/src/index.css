@@ -11,36 +11,41 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
-
+/* HEADER*/
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  background-color: #606060; /* Цвет фона шапки */
+  background-color: #b7b7b7; /* Цвет фона шапки */
 }
 
 .header__logo img {
-  height: 50px; /* Настройте размер логотипа */
+  height: 50px; /* Размер логотипа */
 }
 
 .header__buttons button {
   margin-left: 10px;
   padding: 10px 15px;
   border: none;
-  background-color: #007bff; /* Цвет кнопки */
-  color: white;
+  background-color: #fff8b4; /* Цвет кнопки */
+  color: black;
   cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 .header__buttons button:hover {
-  background-color: #0056b3; /* Цвет кнопки при наведении */
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  background-color: #c3a72d; /* Цвет кнопки при наведении */
+  
 }
-
+/* HEADER*/
+/* FOOTER*/
 .footer {
   padding: 5px;
   text-align: center;
-  background-color: #606060; /* Цвет фона подвала */
+  background-color: #b7b7b7; /* Цвет фона подвала */
   position: fixed;
   bottom: 0px;
   width: 100%;
@@ -49,3 +54,317 @@ code {
 .flight-schedule-management__table-row--cancelled {
   background-color: rgba(255, 0, 0, 0.6);
 }
+/* FOOTER*/
+/* LOGIN */
+.login {
+  background-color: #fff8b5; /* Светло-желтый фон */
+  padding: 20px;
+  width: 400px;
+  margin: 100px auto;
+  border: 2px solid black;
+  border-radius: 10px;
+  position: relative;
+}
+
+.login__title {
+  font-size: 24px;
+  background-color: #fff8b5;
+  text-align: left;
+  padding: 5px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid black;
+}
+
+.login__input-group {
+  margin-bottom: 20px;
+}
+
+.login__label {
+  font-size: 18px;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.login__input {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 2px solid black;
+  border-radius: 5px;
+  background-color: white;
+}
+
+.login__button {
+  width: 100px;
+  padding: 10px;
+  background-color: #4CAF50; /* Зеленая кнопка для логина */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.login__button:hover {
+  background-color: #45a049;
+}
+
+.login__error {
+  color: red;
+  margin-top: 10px;
+}
+
+.login__button-exit {
+  width: 100px;
+  padding: 10px;
+  background-color: #f44336; /* Красная кнопка для выхода */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 20px;
+}
+
+.login__button-exit:hover {
+  background-color: #d32f2f;
+}
+
+.login__buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+/* USERPANEL*/
+.user-panel {
+  max-height: 90vh; 
+  overflow-y: auto;
+  background-color: #fff8b5;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.user-panel__title {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #333;
+  background-color: #fff8b5;
+}
+
+.user-panel__session-time,
+.user-panel__total-time {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #333;
+  background-color: #fff8b5;
+}
+
+.user-panel__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.user-panel__header {
+  background-color: #b7b7b7;
+  font-weight: bold;
+  text-align: left;
+  padding: 8px;
+  border: 1px solid black;
+}
+
+.user-panel__cell {
+  padding: 8px;
+  border: 1px solid black;
+  text-align: center;
+}
+
+.error-row {
+  background-color: #f28b82;
+}
+
+.user-panel__row {
+  background-color: #fff8b5;
+}
+
+.user-panel__row:nth-child(even) {
+  background-color: #ffffe0;
+}
+.user-panel__button_exit{
+  padding: 10px 20px;
+  margin-right: 10px;
+  background-color: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+.user-panel__button_exit:hover {
+  background-color: rgb(207, 6, 6);
+}
+.user-panel__buttons {
+  margin-top: 20px;
+  position: sticky;
+  bottom: 0;
+  background-color: #fff8b5; 
+  padding: 10px;
+  border-top: 1px solid #ddd;
+}
+
+.user-panel__button {
+  padding: 10px 20px;
+  margin-right: 10px;
+  background-color: rgb(57, 57, 0);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.user-panel__button:hover {
+  background-color: rgb(36, 36, 0);
+}
+
+.user-panel__total-crashes {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 10px;
+}
+/* USERPANEL*/
+/* ADMINPANEL */
+.admin-panel {
+  background-color: #fff8b5; /* Светло-желтый фон */
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.admin-panel__title {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.admin-panel__label {
+  font-size: 18px;
+}
+
+.admin-panel__select {
+  padding: 5px;
+  margin-right: 20px;
+}
+
+.admin-panel__button {
+  padding: 10px 20px;
+  margin-right: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+.admin-panel__button_error{
+  padding: 10px 20px;
+  margin-right: 10px;
+  background-color: rgb(57, 57, 0);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+.admin-panel__button_error:hover {
+  background-color: rgb(37, 37, 0);
+}
+.admin-panel__button_exit {
+  padding: 10px 20px;
+  margin-right: 10px;
+  background-color: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+.admin-panel__button_exit:hover {
+  background-color: rgb(196, 16, 16);
+}
+.admin-panel__button:hover {
+  background-color: #45a049;
+}
+
+.admin-panel__table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.admin-panel__table-header {
+  background-color: #b7b7b7;
+  font-weight: bold;
+}
+
+.admin-panel__table-cell {
+  padding: 8px;
+  border: 1px solid black;
+  text-align: center;
+}
+
+.admin-panel__edit-button {
+  padding: 5px 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.admin-panel__edit-button:hover {
+  background-color: #45a049;
+}
+
+.modal {
+  background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.admin-panel__modal {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 400px;
+}
+
+.admin-panel__modal-title {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.admin-panel__form-label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.admin-panel__form-input,
+.admin-panel__form-select {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 20px;
+}
+
+.admin-panel__form-submit-button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.admin-panel__form-close-button {
+  padding: 10px 20px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.admin-panel__form-close-button:hover {
+  background-color: #d32f2f;
+}
+/* ADMINPANEL */
