@@ -141,3 +141,29 @@ class Schedules(models.Model):
 
     class Meta:
         db_table = 'schedules'
+
+
+class CabinTypes(models.Model):
+    id = models.AutoField(db_column='ID', primary_key=True)
+    name = models.TextField(db_column='Name')
+
+    class Meta:
+        db_table = 'cabin_types'
+
+
+class Tickets(models.Model):
+    id = models.AutoField(db_column='ID', primary_key=True)
+    userid = models.ForeignKey(Users, models.DO_NOTHING, db_column='UserID')
+    scheduleid = models.ForeignKey(Schedules, models.DO_NOTHING, db_column='ScheduleID')
+    cabintypeid = models.ForeignKey(CabinTypes, models.DO_NOTHING, db_column='CabinTypeID')
+    first_name = models.TextField(db_column='FirstName')
+    last_name = models.TextField(db_column='LastName')
+    email = models.TextField(db_column='Email')
+    phone = models.TextField(db_column='Phone')
+    passport_number = models.TextField(db_column='PassportNumber')
+    passport_country = models.ForeignKey(Countries, models.DO_NOTHING, db_column='PassportCountryID')
+    booking_reference = models.TextField(db_column='BookingReference')
+    confirmed = models.BooleanField(db_column='Confirmed')
+
+    class Meta:
+        db_table = 'tickets'

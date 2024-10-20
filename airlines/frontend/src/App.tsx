@@ -6,6 +6,7 @@ import UserPanel from './components/UserPanel';
 import axios from 'axios';
 import PrivateRoute from './components/PrivateRoute';
 import FlightScheduleManagement from './components/FlightScheduleManager';
+import FlightSearch from './components/FlightSearch';
 
 const App: React.FC = () => {
   const [userRole, setUserRole] = useState<number | null>(null);
@@ -53,6 +54,7 @@ const App: React.FC = () => {
         <Route path="/admin-panel" element={<PrivateRoute component={AdminPanel} role={1} userRole={userRole} />} />
         <Route path="/user-panel" element={<PrivateRoute component={UserPanel} role={2} userRole={userRole} />} />
         <Route path="/schedules" element={<PrivateRoute component={FlightScheduleManagement} role={2} userRole={userRole} />} />
+        <Route path="/tickets" element={<PrivateRoute component={FlightSearch} role={2} userRole={userRole} />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
