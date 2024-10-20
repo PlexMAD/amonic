@@ -218,7 +218,10 @@ const AdminPanel = () => {
         </tbody>
       </table>
 
-      {showModal && (
+          {showModal && (
+      <>
+        <div className="admin-panel__modal-overlay" onClick={() => setShowModal(false)}></div>
+
         <div className="modal admin-panel__modal">
           <h2 className="admin-panel__modal-title">{userData ? 'Редактировать пользователя' : 'Добавить пользователя'}</h2>
           <form className="admin-panel__form" onSubmit={(e) => {
@@ -317,7 +320,8 @@ const AdminPanel = () => {
             <button type="button" className="admin-panel__form-close-button" onClick={() => setShowModal(false)}>Закрыть</button>
           </form>
         </div>
-      )}
+      </>
+    )}
     </div>
   );
 };
