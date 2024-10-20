@@ -264,13 +264,29 @@ const FlightScheduleManagement: React.FC = () => {
               <td>{flight.first_class_price}</td>
               <td>{flight.confirmed ? 'Подтверждено' : 'Отменено'}</td>
               <td>
-                <button className="flight-schedule-management__button" onClick={() => handleEditFlight(flight)}>Редактировать</button>
-                {flight.confirmed ? (
-                  <button className="flight-schedule-management__button" onClick={() => cancelFlight(flight.id)}>Отменить</button>
-                ) : (
-                  <button className="flight-schedule-management__button" onClick={() => reactivateFlight(flight.id)}>Реактивировать</button>
-                )}
-              </td>
+                  <button
+                    className="flight-schedule-management__button flight-schedule-management__button--edit"
+                    onClick={() => handleEditFlight(flight)}
+                  >
+                    Редактировать
+                  </button>
+                  {flight.confirmed ? (
+                    <button
+                      className="flight-schedule-management__button flight-schedule-management__button--cancel"
+                      onClick={() => cancelFlight(flight.id)}
+                      disabled={!flight.confirmed}  /* Отключаем кнопку для отмененных рейсов */
+                    >
+                      Отменить
+                    </button>
+                  ) : (
+                    <button
+                      className="flight-schedule-management__button flight-schedule-management__button--reactivate"
+                      onClick={() => reactivateFlight(flight.id)}
+                    >
+                      Реактивировать
+                    </button>
+                  )}
+                </td>
             </tr>
           ))}
         </tbody>
