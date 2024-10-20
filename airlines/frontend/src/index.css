@@ -11,3 +11,41 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #606060; /* Цвет фона шапки */
+}
+
+.header__logo img {
+  height: 50px; /* Настройте размер логотипа */
+}
+
+.header__buttons button {
+  margin-left: 10px;
+  padding: 10px 15px;
+  border: none;
+  background-color: #007bff; /* Цвет кнопки */
+  color: white;
+  cursor: pointer;
+}
+
+.header__buttons button:hover {
+  background-color: #0056b3; /* Цвет кнопки при наведении */
+}
+
+.footer {
+  padding: 5px;
+  text-align: center;
+  background-color: #606060; /* Цвет фона подвала */
+  position: fixed;
+  bottom: 0px;
+  width: 100%;
+}
+
+.flight-schedule-management__table-row--cancelled {
+  background-color: rgba(255, 0, 0, 0.6);
+}

@@ -6,8 +6,9 @@ import UserPanel from './components/UserPanel';
 import axios from 'axios';
 import PrivateRoute from './components/PrivateRoute';
 import FlightScheduleManagement from './components/FlightScheduleManager';
+import Header from './components/header'; // Импорт хедера
+import Footer from './components/footer'; // Импорт футера
 import FlightSearch from './components/FlightSearch';
-
 const App: React.FC = () => {
   const [userRole, setUserRole] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -49,6 +50,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
+      <Header /> 
       <Routes>
         <Route path="/" element={userRole ? <Navigate to={getRedirectPath()} /> : <Login setUserRole={setUserRole} />} />
         <Route path="/admin-panel" element={<PrivateRoute component={AdminPanel} role={1} userRole={userRole} />} />
@@ -57,6 +59,7 @@ const App: React.FC = () => {
         <Route path="/tickets" element={<PrivateRoute component={FlightSearch} role={2} userRole={userRole} />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      <Footer />
     </Router>
   );
 };
