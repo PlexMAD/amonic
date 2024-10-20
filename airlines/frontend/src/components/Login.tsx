@@ -70,39 +70,44 @@ const Login: React.FC<LoginProps> = ({ setUserRole }) => {
   };
 
   return (
-    <div className="login">
-      <h2 className="login__title">Login</h2>
-      <form className="login__form" onSubmit={handleLogin}>
-        <div className="login__input-group">
-          <label htmlFor="email" className="login__label">Email:</label>
-          <input
-            type="email"
-            id="email"
-            className="login__input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            disabled={!!timer} 
-          />
-        </div>
-        <div className="login__input-group">
-          <label htmlFor="password" className="login__label">Password:</label>
-          <input
-            type="password"
-            id="password"
-            className="login__input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            disabled={!!timer} 
-          />
-        </div>
-        {error && <p className="login__error">{error}</p>}
-        <button type="submit" className="login__button" disabled={!!timer}>
-          {timer ? `Подождите ${timer}s` : 'Login'}
-        </button>
-      </form>
+<div className="login">
+  <h2 className="login__title">Login</h2>
+  <form className="login__form" onSubmit={handleLogin}>
+    <div className="login__input-group">
+      <label htmlFor="email" className="login__label">Username:</label>
+      <input
+        type="email"
+        id="email"
+        className="login__input"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+        disabled={!!timer} 
+      />
     </div>
+    <div className="login__input-group">
+      <label htmlFor="password" className="login__label">Password:</label>
+      <input
+        type="password"
+        id="password"
+        className="login__input"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+        disabled={!!timer} 
+      />
+    </div>
+    {error && <p className="login__error">{error}</p>}
+    <div className="login__buttons">
+      <button type="submit" className="login__button" disabled={!!timer}>
+        {timer ? `Подождите ${timer}s` : 'Login'}
+      </button>
+      <button type="button" className="login__button-exit" onClick={() => navigate('/')}>
+        Exit
+      </button>
+    </div>
+  </form>
+</div>
   );
 };
 
