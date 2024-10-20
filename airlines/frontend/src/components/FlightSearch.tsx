@@ -16,12 +16,15 @@ interface Schedule {
 const FlightSearch = () => {
     const [fromAirport, setFromAirport] = useState('');
     const [toAirport, setToAirport] = useState('');
-    const [flightDate, setFlightDate] = useState('');
-    const [schedules, setSchedules] = useState<Schedule[]>([]);
+    const [outboundDate, setOutboundDate] = useState('');
+    const [returnDate, setReturnDate] = useState('');
+    const [isRoundTrip, setIsRoundTrip] = useState(false);
+    const [includeNearbyDays, setIncludeNearbyDays] = useState(false);
+    const [outboundFlights, setOutboundFlights] = useState<Schedule[]>([]);
+    const [returnFlights, setReturnFlights] = useState<Schedule[]>([]);
     const [airports, setAirports] = useState<{ id: number; name: string }[]>([]);
 
     useEffect(() => {
-        // Получаем список аэропортов
         axios.get('http://127.0.0.1:8000/api/airports/')
             .then(response => setAirports(response.data))
             .catch(error => console.error(error));
@@ -32,17 +35,37 @@ const FlightSearch = () => {
             params: {
                 departure_airport: fromAirport,
                 arrival_airport: toAirport,
-                date: flightDate,
+                date: outboundDate,
+                include_nearby_days: includeNearbyDays,
             },
         })
-        .then(response => setSchedules(response.data))
+        .then(response => setOutboundFlights(response.data))
         .catch(error => {
             if (error.response.status === 404) {
-                alert('Нет доступных рейсов на указанную дату.');
+                alert('Нет доступных рейсов на выбранную дату.');
             } else {
                 console.error(error);
             }
         });
+
+        if (isRoundTrip && returnDate) {
+            axios.get('http://127.0.0.1:8000/api/schedules/search/', {
+                params: {
+                    departure_airport: toAirport,
+                    arrival_airport: fromAirport,
+                    date: returnDate,
+                    include_nearby_days: includeNearbyDays,
+                },
+            })
+            .then(response => setReturnFlights(response.data))
+            .catch(error => {
+                if (error.response.status === 404) {
+                    alert('Нет доступных обратных рейсов на выбранную дату.');
+                } else {
+                    console.error(error);
+                }
+            });
+        }
     };
 
     return (
@@ -74,16 +97,45 @@ const FlightSearch = () => {
                 </div>
 
                 <div>
-                    <label>Дата полета: </label>
-                    <input type="date" value={flightDate} onChange={e => setFlightDate(e.target.value)} />
+                    <label>Дата вылета: </label>
+                    <input type="date" value={outboundDate} onChange={e => setOutboundDate(e.target.value)} />
+                </div>
+
+                <div>
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={isRoundTrip}
+                            onChange={e => setIsRoundTrip(e.target.checked)}
+                        />
+                        Обратный рейс
+                    </label>
+                </div>
+
+                {isRoundTrip && (
+                    <div>
+                        <label>Дата обратного рейса: </label>
+                        <input type="date" value={returnDate} onChange={e => setReturnDate(e.target.value)} />
+                    </div>
+                )}
+
+                <div>
+                    <label>
+                        <input 
+                            type="checkbox" 
+                            checked={includeNearbyDays} 
+                            onChange={e => setIncludeNearbyDays(e.target.checked)} 
+                        />
+                        Искать рейсы ±3 дня от выбранных дат
+                    </label>
                 </div>
 
                 <button type="button" onClick={handleSearch}>Поиск</button>
             </form>
 
-            {schedules.length > 0 && (
+            {outboundFlights.length > 0 && (
                 <div>
-                    <h3>Доступные рейсы</h3>
+                    <h3>Доступные рейсы туда</h3>
                     <table>
                         <thead>
                             <tr>
@@ -97,7 +149,39 @@ const FlightSearch = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {schedules.map(schedule => (
+                            {outboundFlights.map(schedule => (
+                                <tr key={schedule.id}>
+                                    <td>{schedule.date}</td>
+                                    <td>{schedule.flight_number}</td>
+                                    <td>{schedule.from_airport.name}</td>
+                                    <td>{schedule.to_airport.name}</td>
+                                    <td>{schedule.economy_price} руб.</td>
+                                    <td>{schedule.business_price} руб.</td>
+                                    <td>{schedule.first_class_price} руб.</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {isRoundTrip && returnFlights.length > 0 && (
+                <div>
+                    <h3>Доступные обратные рейсы</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Номер рейса</th>
+                                <th>Аэропорт вылета</th>
+                                <th>Аэропорт прибытия</th>
+                                <th>Цена (эконом)</th>
+                                <th>Цена (бизнес)</th>
+                                <th>Цена (первый класс)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {returnFlights.map(schedule => (
                                 <tr key={schedule.id}>
                                     <td>{schedule.date}</td>
                                     <td>{schedule.flight_number}</td>

@@ -1,6 +1,9 @@
+from datetime import timedelta, datetime
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth import logout
 from django.contrib.auth.hashers import make_password
+from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
@@ -201,22 +204,38 @@ class SchedulesViewSet(viewsets.ModelViewSet):
     serializer_class = SchedulesSerializer
 
     @action(detail=False, methods=['get'], url_path='search')
-    @permission_classes([IsAuthenticated])
     def search(self, request):
         departure_airport = request.query_params.get('departure_airport')
         arrival_airport = request.query_params.get('arrival_airport')
         date = request.query_params.get('date')
+        include_nearby_days = request.query_params.get('include_nearby_days', 'false').lower() == 'true'
 
         if not (departure_airport and arrival_airport and date):
             return Response(
                 {"detail": "Нужно указать все параметры поиска (аэропорт вылета, аэропорт прибытия и дату)."},
                 status=status.HTTP_400_BAD_REQUEST)
 
-        schedules = self.queryset.filter(
-            route__departure_airport=departure_airport,
-            route__arrival_airport=arrival_airport,
-            date=date
-        )
+        try:
+            selected_date = datetime.strptime(date, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({"detail": "Неверный формат даты. Используйте формат ГГГГ-ММ-ДД."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Если указан поиск +-3 дня
+        if include_nearby_days:
+            start_date = selected_date - timedelta(days=3)
+            end_date = selected_date + timedelta(days=3)
+            schedules = self.queryset.filter(
+                Q(route__departure_airport=departure_airport) &
+                Q(route__arrival_airport=arrival_airport) &
+                Q(date__range=(start_date, end_date))
+            )
+        else:
+            schedules = self.queryset.filter(
+                Q(route__departure_airport=departure_airport) &
+                Q(route__arrival_airport=arrival_airport) &
+                Q(date=selected_date)
+            )
 
         if schedules.exists():
             serializer = self.get_serializer(schedules, many=True)
