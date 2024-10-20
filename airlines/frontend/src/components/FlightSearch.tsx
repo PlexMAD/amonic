@@ -1,116 +1,117 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-interface Flight {
+interface Schedule {
+    id: number;
     date: string;
-    flightNumber: string;
-    cabinPrice: number;
-    stops: number;
+    flight_number: string;
+    economy_price: number;
+    business_price: number;
+    first_class_price: number;
+    confirmed: boolean;
+    from_airport: { name: string };
+    to_airport: { name: string };
 }
 
 const FlightSearch = () => {
     const [fromAirport, setFromAirport] = useState('');
     const [toAirport, setToAirport] = useState('');
-    const [isReturn, setIsReturn] = useState(false);
-    const [cabinType, setCabinType] = useState('Economy');
-    const [outboundDate, setOutboundDate] = useState('');
-    const [returnDate, setReturnDate] = useState('');
-    const [flights, setFlights] = useState<Flight[]>([]);
-    const [passengers, setPassengers] = useState<number>(1);
+    const [flightDate, setFlightDate] = useState('');
+    const [schedules, setSchedules] = useState<Schedule[]>([]);
+    const [airports, setAirports] = useState<{ id: number; name: string }[]>([]);
+
+    useEffect(() => {
+        // Получаем список аэропортов
+        axios.get('http://127.0.0.1:8000/api/airports/')
+            .then(response => setAirports(response.data))
+            .catch(error => console.error(error));
+    }, []);
 
     const handleSearch = () => {
-        const foundFlights: Flight[] = [
-            { date: '11/10/2024', flightNumber: 'AB123', cabinPrice: 540, stops: 0 },
-            { date: '11/10/2024', flightNumber: 'CD456', cabinPrice: 560, stops: 1 }
-        ];
-        setFlights(foundFlights);
+        axios.get('http://127.0.0.1:8000/api/schedules/search/', {
+            params: {
+                departure_airport: fromAirport,
+                arrival_airport: toAirport,
+                date: flightDate,
+            },
+        })
+        .then(response => setSchedules(response.data))
+        .catch(error => {
+            if (error.response.status === 404) {
+                alert('Нет доступных рейсов на указанную дату.');
+            } else {
+                console.error(error);
+            }
+        });
     };
 
     return (
         <div>
-            <h2>Search Parameters</h2>
+            <h2>Поиск рейсов</h2>
             <form>
                 <div>
-                    <label>From: </label>
+                    <label>Аэропорт вылета: </label>
                     <select value={fromAirport} onChange={e => setFromAirport(e.target.value)}>
-                        <option value="">Select</option>
-                        <option value="Airport1">Airport 1</option>
-                        <option value="Airport2">Airport 2</option>
+                        <option value="">Выберите</option>
+                        {airports.map(airport => (
+                            <option key={airport.id} value={airport.id}>
+                                {airport.name}
+                            </option>
+                        ))}
                     </select>
                 </div>
 
                 <div>
-                    <label>To: </label>
+                    <label>Аэропорт прибытия: </label>
                     <select value={toAirport} onChange={e => setToAirport(e.target.value)}>
-                        <option value="">Select</option>
-                        <option value="Airport1">Airport 1</option>
-                        <option value="Airport2">Airport 2</option>
+                        <option value="">Выберите</option>
+                        {airports.map(airport => (
+                            <option key={airport.id} value={airport.id}>
+                                {airport.name}
+                            </option>
+                        ))}
                     </select>
                 </div>
 
                 <div>
-                    <label>
-                        <input type="checkbox" checked={isReturn} onChange={e => setIsReturn(e.target.checked)} />
-                        Return
-                    </label>
+                    <label>Дата полета: </label>
+                    <input type="date" value={flightDate} onChange={e => setFlightDate(e.target.value)} />
                 </div>
 
-                <div>
-                    <label>Cabin Type: </label>
-                    <select value={cabinType} onChange={e => setCabinType(e.target.value)}>
-                        <option value="Economy">Economy</option>
-                        <option value="Business">Business</option>
-                        <option value="First">First</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label>Outbound: </label>
-                    <input type="date" value={outboundDate} onChange={e => setOutboundDate(e.target.value)} />
-                </div>
-
-                {isReturn && (
-                    <div>
-                        <label>Return: </label>
-                        <input type="date" value={returnDate} onChange={e => setReturnDate(e.target.value)} />
-                    </div>
-                )}
-
-                <button type="button" onClick={handleSearch}>Apply</button>
+                <button type="button" onClick={handleSearch}>Поиск</button>
             </form>
 
-            <h3>Outbound flight details</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Flight Number</th>
-                        <th>Cabin Price</th>
-                        <th>Number of stops</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {flights.map((flight, index) => (
-                        <tr key={index}>
-                            <td>{flight.date}</td>
-                            <td>{flight.flightNumber}</td>
-                            <td>${flight.cabinPrice}</td>
-                            <td>{flight.stops}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-
-            <h3>Confirm booking for</h3>
-            <div>
-                <label>Passengers: </label>
-                <input 
-                    type="number" 
-                    value={passengers} 
-                    onChange={e => setPassengers(Number(e.target.value))} 
-                    min="1" 
-                />
-                <button>Book flight</button>
-            </div>
+            {schedules.length > 0 && (
+                <div>
+                    <h3>Доступные рейсы</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Номер рейса</th>
+                                <th>Аэропорт вылета</th>
+                                <th>Аэропорт прибытия</th>
+                                <th>Цена (эконом)</th>
+                                <th>Цена (бизнес)</th>
+                                <th>Цена (первый класс)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {schedules.map(schedule => (
+                                <tr key={schedule.id}>
+                                    <td>{schedule.date}</td>
+                                    <td>{schedule.flight_number}</td>
+                                    <td>{schedule.from_airport.name}</td>
+                                    <td>{schedule.to_airport.name}</td>
+                                    <td>{schedule.economy_price} руб.</td>
+                                    <td>{schedule.business_price} руб.</td>
+                                    <td>{schedule.first_class_price} руб.</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 };

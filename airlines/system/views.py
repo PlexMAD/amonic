@@ -2,13 +2,13 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import logout
 from django.contrib.auth.hashers import make_password
 from rest_framework import viewsets
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
-from .models import Offices, Roles, Airports, Routes, Schedules, Aircrafts
+from .models import Offices, Roles, Airports, Routes, Schedules, Aircrafts, Tickets
 from .serializers import UsersSerializer, OfficesSerializer, UserSessionTrackingSerializer, RoutesSerializer, \
-    AirportsSerializer, SchedulesSerializer, AircraftsSerializer
+    AirportsSerializer, SchedulesSerializer, AircraftsSerializer, TicketsSerializer
 
 User = get_user_model()
 
@@ -200,6 +200,30 @@ class SchedulesViewSet(viewsets.ModelViewSet):
     queryset = Schedules.objects.all()
     serializer_class = SchedulesSerializer
 
+    @action(detail=False, methods=['get'], url_path='search')
+    @permission_classes([IsAuthenticated])
+    def search(self, request):
+        departure_airport = request.query_params.get('departure_airport')
+        arrival_airport = request.query_params.get('arrival_airport')
+        date = request.query_params.get('date')
+
+        if not (departure_airport and arrival_airport and date):
+            return Response(
+                {"detail": "Нужно указать все параметры поиска (аэропорт вылета, аэропорт прибытия и дату)."},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        schedules = self.queryset.filter(
+            route__departure_airport=departure_airport,
+            route__arrival_airport=arrival_airport,
+            date=date
+        )
+
+        if schedules.exists():
+            serializer = self.get_serializer(schedules, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({"detail": "Нет доступных рейсов на указанную дату."}, status=status.HTTP_404_NOT_FOUND)
+
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
@@ -214,3 +238,8 @@ def update_schedule(request, schedule_id):
         serializer.save()
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TicketViewSet(viewsets.ModelViewSet):
+    queryset = Tickets.objects.all()
+    serializer_class = TicketsSerializer
