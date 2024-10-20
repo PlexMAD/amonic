@@ -8,6 +8,7 @@ import PrivateRoute from './components/PrivateRoute';
 import FlightScheduleManagement from './components/FlightScheduleManager';
 import Header from './components/header'; // Импорт хедера
 import Footer from './components/footer'; // Импорт футера
+import FlightSearch from './components/FlightSearch';
 const App: React.FC = () => {
   const [userRole, setUserRole] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
