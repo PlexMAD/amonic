@@ -6,8 +6,8 @@ import UserPanel from './components/UserPanel';
 import axios from 'axios';
 import PrivateRoute from './components/PrivateRoute';
 import FlightScheduleManagement from './components/FlightScheduleManager';
-import Header from './components/Header';
-import Footer from './components/Footer';
+import Header from './components/header';
+import Footer from './components/footer';
 
 const App: React.FC = () => {
   const [userRole, setUserRole] = useState<number | null>(null);
