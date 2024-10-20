@@ -106,3 +106,17 @@ class CountriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Countries
         fields = '__all__'
+
+
+class TicketCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tickets
+        fields = ['scheduleid', 'cabintypeid', 'first_name', 'last_name', 'email', 'phone', 'passport_number',
+                  'passport_country', 'booking_reference', 'confirmed']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        validated_data['userid'] = user
+
+
+        return super().create(validated_data)

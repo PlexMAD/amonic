@@ -40,6 +40,7 @@ const FlightSearch = () => {
 
     const [showBookingForm, setShowBookingForm] = useState(false);
     const [countries, setCountries] = useState<{ id: number; name: string }[]>([]);
+    const [cabinType, setCabinType] = useState('economy');
 
     useEffect(() => {
         axios.get('http://127.0.0.1:8000/api/countries/')
@@ -72,6 +73,8 @@ const FlightSearch = () => {
                 }
             });
 
+
+
         if (isRoundTrip && returnDate) {
             axios.get('http://127.0.0.1:8000/api/schedules/search/', {
                 params: {
@@ -100,17 +103,53 @@ const FlightSearch = () => {
         setSelectedReturnFlight(flight);
     };
 
-    const handleAddPassenger = (passenger: Passenger) => {
-        setPassengerList([...passengerList, passenger]);
-    };
-
-    const handleRemovePassenger = (index: number) => {
-        const updatedList = passengerList.filter((_, i) => i !== index);
-        setPassengerList(updatedList);
-    };
-
     const handleBooking = () => {
         setShowBookingForm(true);
+    };
+    const handleConfirmBooking = () => {
+        if (!selectedOutboundFlight) return;
+
+        const bookingData = {
+            flight: selectedOutboundFlight.id,
+            passengers: passengerList.map(passenger => ({
+                first_name: passenger.firstName,
+                last_name: passenger.lastName,
+                birth_date: passenger.birthDate,
+                passport_number: passenger.passportNumber,
+                passport_country: passenger.passportCountry,
+                phone: passenger.phone,
+                email: passenger.email,
+            })),
+            cabintypeid: cabinType === 'economy' ? 1 : cabinType === 'business' ? 2 : 3,
+            returnFlight: isRoundTrip && selectedReturnFlight ? selectedReturnFlight.id : null,
+        };
+
+        const token = localStorage.getItem('access_token'); 
+
+        axios.post('http://127.0.0.1:8000/api/create-ticket/', bookingData, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+            .then(response => {
+                alert('Бронирование успешно создано! Номер бронирования: ' + response.data.booking_number);
+                setShowBookingForm(false);
+            })
+            .catch(error => {
+                console.error('Ошибка при бронировании:', error);
+                alert('Ошибка при создании бронирования. Попробуйте еще раз.');
+            });
+    };
+
+
+    const calculatePrice = (economyPrice: number) => {
+        if (cabinType === 'business') {
+            return Math.round(economyPrice * 1.35);
+        } else if (cabinType === 'first_class') {
+            const businessPrice = Math.round(economyPrice * 1.35);
+            return Math.round(businessPrice * 1.30);
+        }
+        return economyPrice;
     };
 
     return (
@@ -156,6 +195,14 @@ const FlightSearch = () => {
                         Обратный рейс
                     </label>
                 </div>
+                <div>
+                    <label>Тип кабины: </label>
+                    <select value={cabinType} onChange={e => setCabinType(e.target.value)}>
+                        <option value="economy">Эконом</option>
+                        <option value="business">Бизнес</option>
+                        <option value="first_class">Первый класс</option>
+                    </select>
+                </div>
 
                 {isRoundTrip && (
                     <div>
@@ -188,7 +235,7 @@ const FlightSearch = () => {
                                 <th>Номер рейса</th>
                                 <th>Аэропорт вылета</th>
                                 <th>Аэропорт прибытия</th>
-                                <th>Цена (эконом)</th>
+                                <th>Цена</th>
                                 <th>Выбрать</th>
                             </tr>
                         </thead>
@@ -199,7 +246,7 @@ const FlightSearch = () => {
                                     <td>{flight.flight_number}</td>
                                     <td>{flight.from_airport.name}</td>
                                     <td>{flight.to_airport.name}</td>
-                                    <td>{flight.economy_price} руб.</td>
+                                    <td>{calculatePrice(flight.economy_price)} руб.</td>
                                     <td>
                                         <button onClick={() => handleSelectOutboundFlight(flight)}>
                                             {selectedOutboundFlight?.id === flight.id ? 'Выбран' : 'Выбрать'}
@@ -222,7 +269,7 @@ const FlightSearch = () => {
                                 <th>Номер рейса</th>
                                 <th>Аэропорт вылета</th>
                                 <th>Аэропорт прибытия</th>
-                                <th>Цена (эконом)</th>
+                                <th>Цена</th>
                                 <th>Выбрать</th>
                             </tr>
                         </thead>
@@ -233,7 +280,7 @@ const FlightSearch = () => {
                                     <td>{flight.flight_number}</td>
                                     <td>{flight.from_airport.name}</td>
                                     <td>{flight.to_airport.name}</td>
-                                    <td>{flight.economy_price} руб.</td>
+                                    <td>{calculatePrice(flight.economy_price)} руб.</td>
                                     <td>
                                         <button onClick={() => handleSelectReturnFlight(flight)}>
                                             {selectedReturnFlight?.id === flight.id ? 'Выбран' : 'Выбрать'}
@@ -382,7 +429,8 @@ const FlightSearch = () => {
                     </form>
 
 
-                    <button>Подтвердить бронирование</button>
+                    <button onClick={handleConfirmBooking}>Подтвердить бронирование</button>
+
                 </div>
             )}
         </div>

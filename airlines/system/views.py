@@ -1,3 +1,4 @@
+import uuid
 from datetime import timedelta, datetime
 
 from django.contrib.auth import get_user_model
@@ -11,7 +12,8 @@ from rest_framework.views import APIView
 
 from .models import Offices, Roles, Airports, Routes, Schedules, Aircrafts, Tickets, Countries
 from .serializers import UsersSerializer, OfficesSerializer, UserSessionTrackingSerializer, RoutesSerializer, \
-    AirportsSerializer, SchedulesSerializer, AircraftsSerializer, TicketsSerializer, CountriesSerializer
+    AirportsSerializer, SchedulesSerializer, AircraftsSerializer, TicketsSerializer, CountriesSerializer, \
+    TicketCreateSerializer
 
 User = get_user_model()
 
@@ -79,6 +81,7 @@ class OfficeViewSet(viewsets.ModelViewSet):
 class CountriesViewSet(viewsets.ModelViewSet):
     queryset = Countries.objects.all()
     serializer_class = CountriesSerializer
+
 
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
@@ -266,3 +269,43 @@ def update_schedule(request, schedule_id):
 class TicketViewSet(viewsets.ModelViewSet):
     queryset = Tickets.objects.all()
     serializer_class = TicketsSerializer
+
+
+class TicketCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        passengers_data = request.data.get('passengers', [])
+        booking_reference = self.generate_booking_reference()
+        tickets = []
+
+        for passenger in passengers_data:
+            country_name = passenger.get('passport_country')
+            print(country_name)
+            country = Countries.objects.filter(name=country_name).first()
+            print(country)
+
+            if not country:
+                return Response({"error": f"Country '{country_name}' not found."}, status=status.HTTP_400_BAD_REQUEST)
+
+            serializer = TicketCreateSerializer(data={
+                **passenger,
+                'booking_reference': booking_reference,
+                'scheduleid': request.data.get('flight'),
+                'cabintypeid': request.data.get('cabintypeid'),
+                'confirmed': True,
+                'passport_country': country.id,
+            }, context={'request': request})
+
+            if serializer.is_valid():
+                tickets.append(serializer.save())
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({
+            'tickets': [ticket.id for ticket in tickets],
+            'booking_number': booking_reference
+        }, status=status.HTTP_201_CREATED)
+
+    def generate_booking_reference(self):
+        return str(uuid.uuid4())

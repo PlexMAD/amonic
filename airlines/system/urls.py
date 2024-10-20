@@ -32,4 +32,5 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
     path('test_error/', test_error, name='test_error'),
     path('update_schedule/<int:schedule_id>/', update_schedule, name='update_schedule'),
+    path('create-ticket/', TicketCreateView.as_view(), name='create-ticket'),
 ]
