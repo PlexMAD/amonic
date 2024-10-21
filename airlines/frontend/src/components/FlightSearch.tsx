@@ -125,51 +125,19 @@ const FlightSearch = () => {
 
         const token = localStorage.getItem('access_token');
 
-        const bookingRequests = [];
-
-        bookingRequests.push(
-            axios.post('http://127.0.0.1:8000/api/create-ticket/', bookingData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            })
-        );
-
-        if (isRoundTrip && selectedReturnFlight) {
-            const returnBookingData = {
-                flight: selectedReturnFlight.id,
-                passengers: passengerList.map(passenger => ({
-                    first_name: passenger.firstName,
-                    last_name: passenger.lastName,
-                    birth_date: passenger.birthDate,
-                    passport_number: passenger.passportNumber,
-                    passport_country: passenger.passportCountry,
-                    phone: passenger.phone,
-                    email: passenger.email,
-                })),
-                cabintypeid: cabinType === 'economy' ? 1 : cabinType === 'business' ? 2 : 3,
-                returnFlight: null,
-            };
-
-            bookingRequests.push(
-                axios.post('http://127.0.0.1:8000/api/create-ticket/', returnBookingData, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                })
-            );
-        }
-
-        Promise.all(bookingRequests)
-            .then(responses => {
-                const bookingNumbers = responses.map(response => response.data.booking_number);
-                alert('Бронирование успешно создано! Номера бронирования: ' + bookingNumbers.join(', '));
-                setShowBookingForm(false);
-            })
-            .catch(error => {
-                console.error('Ошибка при бронировании:', error);
-                alert('Ошибка при создании бронирования. Попробуйте еще раз.');
-            });
+        axios.post('http://127.0.0.1:8000/api/create-ticket/', bookingData, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+        .then(response => {
+            alert('Бронирование успешно создано!');
+            setShowBookingForm(false);
+        })
+        .catch(error => {
+            console.error('Ошибка при бронировании:', error);
+            alert('Ошибка при создании бронирования. Попробуйте еще раз.');
+        });
     };
 
     const calculatePrice = (economyPrice: number) => {
@@ -210,9 +178,9 @@ const FlightSearch = () => {
     };
 
     return (
-        <div className="flight-search">
-            <h2 className="flight-search__heading">Поиск рейсов</h2>
-            <form className="flight-search__form">
+        <div>
+            <h2>Поиск рейсов</h2>
+            <form>
                 <div>
                     <label>Аэропорт вылета: </label>
                     <select value={fromAirport} onChange={e => setFromAirport(e.target.value)}>
@@ -281,76 +249,42 @@ const FlightSearch = () => {
                 </div>
 
                 <div>
-                    <h3 className="flight-search__heading">Доступные рейсы туда</h3>
-                    <table className="flight-search__table">
-                        <thead>
-                            <tr>
-                                <th className="flight-search__table-cell">Дата</th>
-                                <th className="flight-search__table-cell">Номер рейса</th>
-                                <th className="flight-search__table-cell">Аэропорт вылета</th>
-                                <th className="flight-search__table-cell">Аэропорт прибытия</th>
-                                <th className="flight-search__table-cell">Цена</th>
-                                <th className="flight-search__table-cell">Выбрать</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {outboundFlights.map(flight => (
-                                <tr key={flight.id} className="flight-search__table-row">
-                                    <td className="flight-search__table-cell">{flight.date}</td>
-                                    <td className="flight-search__table-cell">{flight.flight_number}</td>
-                                    <td className="flight-search__table-cell">{flight.from_airport.name}</td>
-                                    <td className="flight-search__table-cell">{flight.to_airport.name}</td>
-                                    <td className="flight-search__table-cell">{calculatePrice(flight.economy_price)} руб.</td>
-                                    <td className="flight-search__table-cell">
-                                        <button
-                                            className={`flight-search__button-choose ${selectedOutboundFlight?.id === flight.id ? 'selected' : ''}`}
-                                            onClick={() => handleSelectOutboundFlight(flight)}
-                                        >
-                                            {selectedOutboundFlight?.id === flight.id ? 'Выбран' : 'Выбрать'}
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <label>Количество пассажиров: </label>
+                    <select value={passengerCount} onChange={handlePassengerCountChange}>
+                        {[1, 2, 3, 4, 5].map(count => (
+                            <option key={count} value={count}>{count}</option>
+                        ))}
+                    </select>
                 </div>
-            )}
 
-            {isRoundTrip && returnFlights.length > 0 && (
-                <div>
-                    <h3 className="flight-search__heading">Доступные обратные рейсы</h3>
-                    <table className="flight-search__table">
-                        <thead>
-                            <tr>
-                                <th className="flight-search__table-cell">Дата</th>
-                                <th className="flight-search__table-cell">Номер рейса</th>
-                                <th className="flight-search__table-cell">Аэропорт вылета</th>
-                                <th className="flight-search__table-cell">Аэропорт прибытия</th>
-                                <th className="flight-search__table-cell">Цена</th>
-                                <th className="flight-search__table-cell">Выбрать</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {returnFlights.map(flight => (
-                                <tr key={flight.id} className="flight-search__table-row">
-                                    <td className="flight-search__table-cell">{flight.date}</td>
-                                    <td className="flight-search__table-cell">{flight.flight_number}</td>
-                                    <td className="flight-search__table-cell">{flight.from_airport.name}</td>
-                                    <td className="flight-search__table-cell">{flight.to_airport.name}</td>
-                                    <td className="flight-search__table-cell">{calculatePrice(flight.economy_price)} руб.</td>
-                                    <td className="flight-search__table-cell">
-                                        <button
-                                            className={`flight-search__button-choose ${selectedReturnFlight?.id === flight.id ? 'selected' : ''}`}
-                                            onClick={() => handleSelectReturnFlight(flight)}
-                                        >
-                                            {selectedReturnFlight?.id === flight.id ? 'Выбран' : 'Выбрать'}
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <button type="button" onClick={handleSearch}>Поиск рейсов</button>
+            </form>
+
+            <h3>Доступные рейсы</h3>
+            <h4>Вылет</h4>
+            <ul>
+                {outboundFlights.map(flight => (
+                    <li key={flight.id}>
+                        <span>{flight.date} - {flight.flight_number} ({flight.from_airport.name} → {flight.to_airport.name})</span>
+                        <span> Цена: {calculatePrice(flight.economy_price)} Руб.</span>
+                        <button onClick={() => handleSelectOutboundFlight(flight)}>Выбрать</button>
+                    </li>
+                ))}
+            </ul>
+
+            {isRoundTrip && (
+                <>
+                    <h4>Обратный рейс</h4>
+                    <ul>
+                        {returnFlights.map(flight => (
+                            <li key={flight.id}>
+                                <span>{flight.date} - {flight.flight_number} ({flight.from_airport.name} → {flight.to_airport.name})</span>
+                                <span> Цена: {calculatePrice(flight.economy_price)} Руб.</span>
+                                <button onClick={() => handleSelectReturnFlight(flight)}>Выбрать</button>
+                            </li>
+                        ))}
+                    </ul>
+                </>
             )}
 
             <button onClick={handleBooking} disabled={!selectedOutboundFlight}>Забронировать рейс</button>
