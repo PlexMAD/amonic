@@ -176,6 +176,7 @@ const FlightSearch = () => {
     };
 
     return (
+<<<<<<< HEAD
         <div className="flight-search">
             <h2 className="flight-search__heading">Поиск рейсов</h2>
         <div className="flight-search">
@@ -184,6 +185,14 @@ const FlightSearch = () => {
                 <div className="flight-search__form-group">
                     <label className="flight-search__label">Аэропорт вылета: </label>
                     <select className="flight-search__select" value={fromAirport} onChange={e => setFromAirport(e.target.value)}>
+=======
+        <div>
+            <h2>Поиск рейсов</h2>
+            <form>
+                <div>
+                    <label>Аэропорт вылета: </label>
+                    <select value={fromAirport} onChange={e => setFromAirport(e.target.value)}>
+>>>>>>> cf464ce (1)
                         <option value="">Выберите</option>
                         {airports.map(airport => (
                             <option key={airport.id} value={airport.id}>
@@ -250,14 +259,21 @@ const FlightSearch = () => {
                     </label>
                 </div>
 
+<<<<<<< HEAD
                 <div className="flight-search__form-group">
                     <label className="flight-search__label">Количество пассажиров: </label>
                     <select className="flight-search__select" value={passengerCount} onChange={handlePassengerCountChange}>
+=======
+                <div>
+                    <label>Количество пассажиров: </label>
+                    <select value={passengerCount} onChange={handlePassengerCountChange}>
+>>>>>>> cf464ce (1)
                         {[1, 2, 3, 4, 5].map(count => (
                             <option key={count} value={count}>{count}</option>
                         ))}
                     </select>
                 </div>
+<<<<<<< HEAD
 
                 <button className="flight-search__button" type="button" onClick={handleSearch}>Поиск рейсов</button>
             </form>
@@ -302,6 +318,40 @@ const FlightSearch = () => {
             )}
 
             <button className="flight-search__button" onClick={handleBooking} disabled={!selectedOutboundFlightId}>Забронировать рейс</button>
+=======
+
+                <button type="button" onClick={handleSearch}>Поиск рейсов</button>
+            </form>
+
+            <h3>Доступные рейсы</h3>
+            <h4>Вылет</h4>
+            <ul>
+                {outboundFlights.map(flight => (
+                    <li key={flight.id}>
+                        <span>{flight.date} - {flight.flight_number} ({flight.from_airport.name} → {flight.to_airport.name})</span>
+                        <span> Цена: {calculatePrice(flight.economy_price)} Руб.</span>
+                        <button onClick={() => handleSelectOutboundFlight(flight)}>Выбрать</button>
+                    </li>
+                ))}
+            </ul>
+
+            {isRoundTrip && (
+                <>
+                    <h4>Обратный рейс</h4>
+                    <ul>
+                        {returnFlights.map(flight => (
+                            <li key={flight.id}>
+                                <span>{flight.date} - {flight.flight_number} ({flight.from_airport.name} → {flight.to_airport.name})</span>
+                                <span> Цена: {calculatePrice(flight.economy_price)} Руб.</span>
+                                <button onClick={() => handleSelectReturnFlight(flight)}>Выбрать</button>
+                            </li>
+                        ))}
+                    </ul>
+                </>
+            )}
+
+            <button onClick={handleBooking} disabled={!selectedOutboundFlight}>Забронировать рейс</button>
+>>>>>>> cf464ce (1)
 
             {showBookingForm && (
                 <div className="flight-search__booking-form">
