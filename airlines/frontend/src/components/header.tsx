@@ -17,6 +17,10 @@ const Header: React.FC = () => {
     navigate('/tickets'); // Добавьте путь для страницы тикетов
   };
 
+  const handleNavigateToReports = () => {
+    navigate('/reports'); // Добавьте путь для страницы тикетов
+  };
+
   return (
     <header className="header">
       <div className="header__logo">
@@ -26,6 +30,7 @@ const Header: React.FC = () => {
         <button onClick={handleNavigateToUserPanel}>Пользовательская панель</button>
         <button onClick={handleNavigateToSchedule}>Расписание рейсов</button>
         <button onClick={handleNavigateToTickets}>Тикеты</button>
+        <button onClick={handleNavigateToReports}>Репорт отчеты</button>
       </div>
     </header>
   );

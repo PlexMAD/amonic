@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Импорт Bootstrap стилей
+import '../index.css'; 
 
-// Определяем интерфейсы для данных опроса
 interface ArrivalAirport {
     id: number;
     iata_code: string;
@@ -11,7 +10,7 @@ interface ArrivalAirport {
 
 interface TravelClass {
     id: number;
-    name: 'Economy' | 'Business' | 'First Class'; // Обновлено на 'First Class'
+    name: 'Economy' | 'Business' | 'First Class';
 }
 
 interface Survey {
@@ -20,7 +19,7 @@ interface Survey {
     arrival_airport: ArrivalAirport;
     travel_class: TravelClass;
     age: number;
-    gender: 'M' | 'F'; // Учитываем только Male (M) и Female (F)
+    gender: 'M' | 'F';
     q1: number;
     q2: number;
     q3: number;
@@ -33,7 +32,6 @@ const FlightSatisfactionReport: React.FC = () => {
     const [ageCategories, setAgeCategories] = useState<{ '18-24': number; '25-39': number; '40-59': number; '60+': number }>({ '18-24': 0, '25-39': 0, '40-59': 0, '60+': 0 });
     const [flightClasses, setFlightClasses] = useState<{ Economy: number; Business: number; 'First Class': number }>({ Economy: 0, Business: 0, 'First Class': 0 });
     const [arrivalAirports, setArrivalAirports] = useState<{ [key: string]: number }>({});
-    const [fullReport, setFullReport] = useState<any>(null); // Изначально null
     const [showFullReport, setShowFullReport] = useState(false);
 
     useEffect(() => {
@@ -41,8 +39,6 @@ const FlightSatisfactionReport: React.FC = () => {
             .then(response => response.json())
             .then(data => {
                 processSurveyData(data);
-                const report = processFullReportData(data);
-                setFullReport(report); // Устанавливаем данные отчета
             })
             .catch(error => console.error('Error fetching data:', error));
     }, []);
@@ -55,14 +51,12 @@ const FlightSatisfactionReport: React.FC = () => {
         let airportCount: { [key: string]: number } = {};
 
         surveyData.forEach(survey => {
-            // Gender count
             if (survey.gender === 'M') {
                 maleCount++;
             } else if (survey.gender === 'F') {
                 femaleCount++;
             }
 
-            // Age category count
             const age = survey.age;
             if (age >= 18 && age <= 24) {
                 ageCatCount['18-24']++;
@@ -74,13 +68,9 @@ const FlightSatisfactionReport: React.FC = () => {
                 ageCatCount['60+']++;
             }
 
-            // Flight class count
-            const flightClass = survey.travel_class.name as keyof typeof flightClassCount; // Приведение типа
-            if (flightClassCount[flightClass] !== undefined) {
-                flightClassCount[flightClass]++;
-            }
+            const flightClass = survey.travel_class.name as keyof typeof flightClassCount;
+            flightClassCount[flightClass]++;
 
-            // Arrival airport count
             const arrivalAirport = survey.arrival_airport.name;
             if (airportCount[arrivalAirport]) {
                 airportCount[arrivalAirport]++;
@@ -95,112 +85,60 @@ const FlightSatisfactionReport: React.FC = () => {
         setArrivalAirports(airportCount);
     };
 
-    const processFullReportData = (data: Survey[]) => {
-        // Здесь вы пишете логику для обработки полного отчета, 
-        // подсчитываете ответы на вопросы и формируете объект для рендеринга таблицы.
-        let report = {
-            q1: { outstanding: 0, veryGood: 0, good: 0, adequate: 0, needsImprovement: 0, poor: 0, dontKnow: 0 },
-            q2: { outstanding: 0, veryGood: 0, good: 0, adequate: 0, needsImprovement: 0, poor: 0, dontKnow: 0 },
-            q3: { outstanding: 0, veryGood: 0, good: 0, adequate: 0, needsImprovement: 0, poor: 0, dontKnow: 0 },
-            q4: { outstanding: 0, veryGood: 0, good: 0, adequate: 0, needsImprovement: 0, poor: 0, dontKnow: 0 }
-        };
-
-        // Пример обработки данных и подсчета значений (можно доработать под вашу логику):
-        data.forEach(survey => {
-            // Логика для обработки каждого вопроса q1, q2, q3, q4
-            // Например:
-            if (survey.q1 === 7) report.q1.outstanding++;
-            else if (survey.q1 === 6) report.q1.veryGood++;
-            else if (survey.q1 === 5) report.q1.good++;
-            // И так далее для всех вопросов q2, q3, q4
-        });
-
-        return report;
-    };
-
-    const renderReportTable = (reportData: any) => {
-        if (!reportData || Object.keys(reportData).length === 0) {
-            return <p>No data available</p>; // Если данных нет, выводим сообщение
-        }
-
-        // Пример рендеринга таблицы с результатами
-        return (
-            <table className="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Question</th>
-                        <th>Outstanding</th>
-                        <th>Very Good</th>
-                        <th>Good</th>
-                        <th>Adequate</th>
-                        <th>Needs Improvement</th>
-                        <th>Poor</th>
-                        <th>Don't Know</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {Object.keys(reportData).map((question, idx) => (
-                        <tr key={idx}>
-                            <td>{question}</td>
-                            <td>{reportData[question].outstanding}</td>
-                            <td>{reportData[question].veryGood}</td>
-                            <td>{reportData[question].good}</td>
-                            <td>{reportData[question].adequate}</td>
-                            <td>{reportData[question].needsImprovement}</td>
-                            <td>{reportData[question].poor}</td>
-                            <td>{reportData[question].dontKnow}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        );
-    };
-
     return (
-        <div className="container">
-            <h1>Flight Satisfaction Report</h1>
-            <h2>Summary Report</h2>
-            <table className="table">
-                <thead>
-                    <tr>
-                        <th>Gender</th>
-                        <th>Count</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Male</td>
-                        <td>{genderCount.male}</td>
-                    </tr>
-                    <tr>
-                        <td>Female</td>
-                        <td>{genderCount.female}</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <h3>Age Distribution</h3>
-            <ul>
-                {Object.entries(ageCategories).map(([category, count]) => (
-                    <li key={category}>{category}: {count}</li>
-                ))}
-            </ul>
-
-            <h3>Flight Classes</h3>
-            <ul>
-                {Object.entries(flightClasses).map(([flightClass, count]) => (
-                    <li key={flightClass}>{flightClass}: {count}</li>
-                ))}
-            </ul>
-
-            <h3>Arrival Airports</h3>
-            <ul>
-                {Object.entries(arrivalAirports).map(([airport, count]) => (
-                    <li key={airport}>{airport}: {count}</li>
-                ))}
-            </ul>
-
-            <button className="btn btn-primary" onClick={() => setShowFullReport(true)}><a href='full_report'>Show Full Report</a></button>
+        <div className="report">
+            <header className="report__header">
+                <h1 className="report__title">Отчёт о удовлетворенности полетом</h1>
+                <h2 className="report__subtitle">Сводный отчёт</h2>
+            </header>
+            <section className="report__section">
+                <h3 className="report__section-title">Распределение по полу</h3>
+                <table className="report__table">
+                    <thead>
+                        <tr className="report__table-row report__table-row--header">
+                            <th className="report__table-header">Пол</th>
+                            <th className="report__table-header">Количество</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr className="report__table-row">
+                            <td className="report__table-cell">Мужчины</td>
+                            <td className="report__table-cell">{genderCount.male}</td>
+                        </tr>
+                        <tr className="report__table-row">
+                            <td className="report__table-cell">Женщины</td>
+                            <td className="report__table-cell">{genderCount.female}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section className="report__section">
+                <h3 className="report__section-title">Распределение по возрасту</h3>
+                <ul className="report__list">
+                    {Object.entries(ageCategories).map(([category, count]) => (
+                        <li key={category} className="report__list-item">{category}: {count}</li>
+                    ))}
+                </ul>
+            </section>
+            <section className="report__section">
+                <h3 className="report__section-title">Классы перелётов</h3>
+                <ul className="report__list">
+                    {Object.entries(flightClasses).map(([flightClass, count]) => (
+                        <li key={flightClass} className="report__list-item">{flightClass}: {count}</li>
+                    ))}
+                </ul>
+            </section>
+            <section className="report__section">
+                <h3 className="report__section-title">Аэропорты прибытия</h3>
+                <ul className="report__list">
+                    {Object.entries(arrivalAirports).map(([airport, count]) => (
+                        <li key={airport} className="report__list-item">{airport}: {count}</li>
+                    ))}
+                </ul>
+            </section>
+            <footer className="report__footer">
+                <button className="report__button"><a style={{ textDecoration: 'none', color: 'white' }} href="/full_report">Показать полный отчёт</a></button>
+            </footer>
         </div>
     );
 };
