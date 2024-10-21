@@ -35,9 +35,8 @@ const FlightSearch = () => {
     const [selectedOutboundFlight, setSelectedOutboundFlight] = useState<Schedule | null>(null);
     const [selectedReturnFlight, setSelectedReturnFlight] = useState<Schedule | null>(null);
     const [passengerCount, setPassengerCount] = useState(1);
-    const [passengerList, setPassengerList] = useState<Passenger[]>([]);
+    const [passengerList, setPassengerList] = useState<Passenger[]>([{} as Passenger]); // Начальное значение с одним пассажиром
     const [airports, setAirports] = useState<{ id: number; name: string }[]>([]);
-
     const [showBookingForm, setShowBookingForm] = useState(false);
     const [countries, setCountries] = useState<{ id: number; name: string }[]>([]);
     const [cabinType, setCabinType] = useState('economy');
@@ -47,7 +46,6 @@ const FlightSearch = () => {
             .then(response => setCountries(response.data))
             .catch(error => console.error(error));
     }, []);
-
 
     useEffect(() => {
         axios.get('http://127.0.0.1:8000/api/airports/')
@@ -72,8 +70,6 @@ const FlightSearch = () => {
                     console.error(error);
                 }
             });
-
-
 
         if (isRoundTrip && returnDate) {
             axios.get('http://127.0.0.1:8000/api/schedules/search/', {
@@ -106,6 +102,7 @@ const FlightSearch = () => {
     const handleBooking = () => {
         setShowBookingForm(true);
     };
+
     const handleConfirmBooking = () => {
         if (!selectedOutboundFlight) return;
 
@@ -122,60 +119,25 @@ const FlightSearch = () => {
             })),
             cabintypeid: cabinType === 'economy' ? 1 : cabinType === 'business' ? 2 : 3,
             returnFlight: isRoundTrip && selectedReturnFlight ? selectedReturnFlight.id : null,
+            has_return_trip: isRoundTrip // Новый параметр
         };
 
         const token = localStorage.getItem('access_token');
 
-
-        const bookingRequests = [];
-
-
-        bookingRequests.push(
-            axios.post('http://127.0.0.1:8000/api/create-ticket/', bookingData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            })
-        );
-
-
-        if (isRoundTrip && selectedReturnFlight) {
-            const returnBookingData = {
-                flight: selectedReturnFlight.id,
-                passengers: passengerList.map(passenger => ({
-                    first_name: passenger.firstName,
-                    last_name: passenger.lastName,
-                    birth_date: passenger.birthDate,
-                    passport_number: passenger.passportNumber,
-                    passport_country: passenger.passportCountry,
-                    phone: passenger.phone,
-                    email: passenger.email,
-                })),
-                cabintypeid: cabinType === 'economy' ? 1 : cabinType === 'business' ? 2 : 3,
-                returnFlight: null,
-            };
-
-            bookingRequests.push(
-                axios.post('http://127.0.0.1:8000/api/create-ticket/', returnBookingData, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                })
-            );
-        }
-
-        Promise.all(bookingRequests)
-            .then(responses => {
-                const bookingNumbers = responses.map(response => response.data.booking_number);
-                alert('Бронирование успешно создано! Номера бронирования: ' + bookingNumbers.join(', '));
-                setShowBookingForm(false);
-            })
-            .catch(error => {
-                console.error('Ошибка при бронировании:', error);
-                alert('Ошибка при создании бронирования. Попробуйте еще раз.');
-            });
+        axios.post('http://127.0.0.1:8000/api/create-ticket/', bookingData, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+        .then(response => {
+            alert('Бронирование успешно создано!');
+            setShowBookingForm(false);
+        })
+        .catch(error => {
+            console.error('Ошибка при бронировании:', error);
+            alert('Ошибка при создании бронирования. Попробуйте еще раз.');
+        });
     };
-
 
     const calculatePrice = (economyPrice: number) => {
         if (cabinType === 'business') {
@@ -187,13 +149,40 @@ const FlightSearch = () => {
         return economyPrice;
     };
 
+    const handlePassengerCountChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const count = parseInt(e.target.value);
+        setPassengerCount(count);
+        
+        // Обновляем список пассажиров при изменении количества
+        const updatedPassengerList = Array.from({ length: count }, (_, index) => passengerList[index] || ({} as Passenger));
+        setPassengerList(updatedPassengerList);
+    };
+
+    const handleAddPassenger = () => {
+        setPassengerCount(prevCount => prevCount + 1);
+        setPassengerList(prevList => [...prevList, {} as Passenger]); // Добавление пустого объекта для нового пассажира
+    };
+
+    const handleRemovePassenger = () => {
+        if (passengerCount > 1) {
+            setPassengerCount(prevCount => prevCount - 1);
+            setPassengerList(prevList => prevList.slice(0, -1)); // Удаление последнего пассажира
+        }
+    };
+
+    const handlePassengerChange = (index: number, field: keyof Passenger, value: string) => {
+        const newList = [...passengerList];
+        newList[index] = { ...newList[index], [field]: value };
+        setPassengerList(newList);
+    };
+
     return (
-                <div className="flight-search">
-            <h2 className="flight-search__heading">Поиск рейсов</h2>
-            <form className="flight-search__form">
+        <div>
+            <h2>Поиск рейсов</h2>
+            <form>
                 <div>
-                    <label className="flight-search__label">Аэропорт вылета:</label>
-                    <select className="flight-search__select" value={fromAirport} onChange={e => setFromAirport(e.target.value)}>
+                    <label>Аэропорт вылета: </label>
+                    <select value={fromAirport} onChange={e => setFromAirport(e.target.value)}>
                         <option value="">Выберите</option>
                         {airports.map(airport => (
                             <option key={airport.id} value={airport.id}>
@@ -204,8 +193,8 @@ const FlightSearch = () => {
                 </div>
 
                 <div>
-                    <label className="flight-search__label">Аэропорт прибытия:</label>
-                    <select className="flight-search__select" value={toAirport} onChange={e => setToAirport(e.target.value)}>
+                    <label>Аэропорт прибытия: </label>
+                    <select value={toAirport} onChange={e => setToAirport(e.target.value)}>
                         <option value="">Выберите</option>
                         {airports.map(airport => (
                             <option key={airport.id} value={airport.id}>
@@ -216,20 +205,24 @@ const FlightSearch = () => {
                 </div>
 
                 <div>
-                    <label className="flight-search__label">Дата вылета:</label>
-                    <input className="flight-search__input" type="date" value={outboundDate} onChange={e => setOutboundDate(e.target.value)} />
+                    <label>Дата вылета: </label>
+                    <input type="date" value={outboundDate} onChange={e => setOutboundDate(e.target.value)} />
                 </div>
 
                 <div>
-                    <label className="flight-search__label">
-                        <input className="flight-search__checkbox" type="checkbox" checked={isRoundTrip} onChange={e => setIsRoundTrip(e.target.checked)} />
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={isRoundTrip}
+                            onChange={e => setIsRoundTrip(e.target.checked)}
+                        />
                         Обратный рейс
                     </label>
                 </div>
 
                 <div>
-                    <label className="flight-search__label">Тип кабины:</label>
-                    <select className="flight-search__select" value={cabinType} onChange={e => setCabinType(e.target.value)}>
+                    <label>Тип кабины: </label>
+                    <select value={cabinType} onChange={e => setCabinType(e.target.value)}>
                         <option value="economy">Эконом</option>
                         <option value="business">Бизнес</option>
                         <option value="first_class">Первый класс</option>
@@ -238,149 +231,86 @@ const FlightSearch = () => {
 
                 {isRoundTrip && (
                     <div>
-                        <label className="flight-search__label">Дата обратного рейса:</label>
-                        <input className="flight-search__input" type="date" value={returnDate} onChange={e => setReturnDate(e.target.value)} />
+                        <label>Дата обратного рейса: </label>
+                        <input type="date" value={returnDate} onChange={e => setReturnDate(e.target.value)} />
                     </div>
                 )}
 
                 <div>
-                    <label className="flight-search__label">
-                        <input className="flight-search__checkbox" type="checkbox" checked={includeNearbyDays} onChange={e => setIncludeNearbyDays(e.target.checked)} />
+                    <label>
+                        <input
+                            type="checkbox"
+                            checked={includeNearbyDays}
+                            onChange={e => setIncludeNearbyDays(e.target.checked)}
+                        />
                         Искать рейсы ±3 дня от выбранных дат
                     </label>
                 </div>
 
-                <button className="flight-search__button" type="button" onClick={handleSearch}>Поиск</button>
+                <div>
+                    <label>Количество пассажиров: </label>
+                    <select value={passengerCount} onChange={handlePassengerCountChange}>
+                        {[1, 2, 3, 4, 5].map(count => (
+                            <option key={count} value={count}>{count}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <button type="button" onClick={handleSearch}>Поиск рейсов</button>
             </form>
 
-            {outboundFlights.length > 0 && (
-                <div>
-                    <h3 className="flight-search__heading">Доступные рейсы туда</h3>
-                    <table className="flight-search__table">
-                        <thead>
-                            <tr>
-                                <th className="flight-search__table-cell">Дата</th>
-                                <th className="flight-search__table-cell">Номер рейса</th>
-                                <th className="flight-search__table-cell">Аэропорт вылета</th>
-                                <th className="flight-search__table-cell">Аэропорт прибытия</th>
-                                <th className="flight-search__table-cell">Цена</th>
-                                <th className="flight-search__table-cell">Выбрать</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {outboundFlights.map(flight => (
-                                <tr key={flight.id} className="flight-search__table-row">
-                                    <td className="flight-search__table-cell">{flight.date}</td>
-                                    <td className="flight-search__table-cell">{flight.flight_number}</td>
-                                    <td className="flight-search__table-cell">{flight.from_airport.name}</td>
-                                    <td className="flight-search__table-cell">{flight.to_airport.name}</td>
-                                    <td className="flight-search__table-cell">{calculatePrice(flight.economy_price)} руб.</td>
-                                    <td className="flight-search__table-cell">
-                                        <button className="flight-search__button" onClick={() => handleSelectOutboundFlight(flight)}>
-                                            {selectedOutboundFlight?.id === flight.id ? 'Выбран' : 'Выбрать'}
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+            <h3>Доступные рейсы</h3>
+            <h4>Вылет</h4>
+            <ul>
+                {outboundFlights.map(flight => (
+                    <li key={flight.id}>
+                        <span>{flight.date} - {flight.flight_number} ({flight.from_airport.name} → {flight.to_airport.name})</span>
+                        <span> Цена: {calculatePrice(flight.economy_price)} Руб.</span>
+                        <button onClick={() => handleSelectOutboundFlight(flight)}>Выбрать</button>
+                    </li>
+                ))}
+            </ul>
+
+            {isRoundTrip && (
+                <>
+                    <h4>Обратный рейс</h4>
+                    <ul>
+                        {returnFlights.map(flight => (
+                            <li key={flight.id}>
+                                <span>{flight.date} - {flight.flight_number} ({flight.from_airport.name} → {flight.to_airport.name})</span>
+                                <span> Цена: {calculatePrice(flight.economy_price)} Руб.</span>
+                                <button onClick={() => handleSelectReturnFlight(flight)}>Выбрать</button>
+                            </li>
+                        ))}
+                    </ul>
+                </>
             )}
 
-            {isRoundTrip && returnFlights.length > 0 && (
-                <div>
-                    <h3 className="flight-search__heading">Доступные обратные рейсы</h3>
-                    <table className="flight-search__table">
-                        <thead>
-                            <tr>
-                                <th className="flight-search__table-cell">Дата</th>
-                                <th className="flight-search__table-cell">Номер рейса</th>
-                                <th className="flight-search__table-cell">Аэропорт вылета</th>
-                                <th className="flight-search__table-cell">Аэропорт прибытия</th>
-                                <th className="flight-search__table-cell">Цена</th>
-                                <th className="flight-search__table-cell">Выбрать</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {returnFlights.map(flight => (
-                                <tr key={flight.id} className="flight-search__table-row">
-                                    <td className="flight-search__table-cell">{flight.date}</td>
-                                    <td className="flight-search__table-cell">{flight.flight_number}</td>
-                                    <td className="flight-search__table-cell">{flight.from_airport.name}</td>
-                                    <td className="flight-search__table-cell">{flight.to_airport.name}</td>
-                                    <td className="flight-search__table-cell">{calculatePrice(flight.economy_price)} руб.</td>
-                                    <td className="flight-search__table-cell">
-                                        <button className="flight-search__button" onClick={() => handleSelectReturnFlight(flight)}>
-                                            {selectedReturnFlight?.id === flight.id ? 'Выбран' : 'Выбрать'}
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-
-            <div>
-                <label className="flight-search__label">Количество пассажиров:</label>
-                <input className="flight-search__input" type="number" value={passengerCount} min={1} onChange={e => setPassengerCount(Number(e.target.value))} />
-            </div>
-
-            <button className="flight-search__button-booking" onClick={handleBooking} disabled={!selectedOutboundFlight || (isRoundTrip && !selectedReturnFlight)}>
-                Забронировать
-            </button>
+            <button onClick={handleBooking} disabled={!selectedOutboundFlight}>Забронировать рейс</button>
 
             {showBookingForm && (
                 <div>
-                    <h2 className="flight-search__heading">Оформление бронирования</h2>
-                    <div>
-                        <h3 className="flight-search__heading">Детали вылета</h3>
-                        <p>{`Вылет: ${selectedOutboundFlight?.from_airport.name} - Прибытие: ${selectedOutboundFlight?.to_airport.name} - Дата: ${selectedOutboundFlight?.date}`}</p>
-                        {isRoundTrip && selectedReturnFlight && (
-                            <p>{`Обратный рейс: ${selectedReturnFlight.from_airport.name} - ${selectedReturnFlight.to_airport.name} - Дата: ${selectedReturnFlight.date}`}</p>
-                        )}
-                    </div>
-
-                    <h3 className="flight-search__heading">Детали пассажиров</h3>
-                    <form className="flight-search__passenger-form">
-                        {Array.from({ length: passengerCount }, (_, index) => (
-                            <div key={index} className="flight-search__passenger-block">
-                                <h3 className="flight-search__heading">Пассажир {index + 1}</h3>
-                                <label className="flight-search__label">Имя:</label>
-                                <input className="flight-search__input" type="text" value={passengerList[index]?.firstName || ''} />
-                                <label className="flight-search__label">Фамилия:</label>
-                                <input className="flight-search__input" type="text" value={passengerList[index]?.lastName || ''} />
-                                <label className="flight-search__label">Дата рождения:</label>
-                                <input className="flight-search__input" type="date" value={passengerList[index]?.birthDate || ''} />
-                                <label className="flight-search__label">Номер паспорта:</label>
-                                <input className="flight-search__input" type="text" value={passengerList[index]?.passportNumber || ''} />
-                                <label className="flight-search__label">Страна паспорта:</label>
-                                <select className="flight-search__select" value={passengerList[index]?.passportCountry || ''}>
-                                    <option value="">Выберите</option>
-                                    {countries.map(country => (
-                                        <option key={country.id} value={country.name}>
-                                            {country.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                <label className="flight-search__label">Email:</label>
-                                <input className="flight-search__input" type="email" value={passengerList[index]?.email || ''} />
-                                <label className="flight-search__label">Телефон:</label>
-                                <input className="flight-search__input" type="text" value={passengerList[index]?.phone || ''} />
-                            </div>
-                        ))}
-
-                        <button className="flight-search__button-add-passenger" type="button" onClick={() => setPassengerCount(passengerCount + 1)}>
-                            Добавить пассажира
-                        </button>
-                        <button className="flight-search__button-remove-passenger" type="button" onClick={() => setPassengerCount(passengerCount > 1 ? passengerCount - 1 : 1)} disabled={passengerCount <= 1}>
-                            Удалить пассажира
-                        </button>
-                    </form>
-
-                    <button className="flight-search__button-close" type="button" onClick={() => setShowBookingForm(false)}>Закрыть</button>
-
-                    <button className="flight-search__button-confirm-booking" onClick={handleConfirmBooking}>Подтвердить бронирование</button>
+                    <h3>Форма бронирования</h3>
+                    {Array.from({ length: passengerCount }).map((_, index) => (
+                        <div key={index}>
+                            <h4>Пассажир {index + 1}</h4>
+                            <input type="text" placeholder="Имя" onChange={e => handlePassengerChange(index, 'firstName', e.target.value)} />
+                            <input type="text" placeholder="Фамилия" onChange={e => handlePassengerChange(index, 'lastName', e.target.value)} />
+                            <input type="date" placeholder="Дата рождения" onChange={e => handlePassengerChange(index, 'birthDate', e.target.value)} />
+                            <input type="text" placeholder="Номер паспорта" onChange={e => handlePassengerChange(index, 'passportNumber', e.target.value)} />
+                            <select onChange={e => handlePassengerChange(index, 'passportCountry', e.target.value)}>
+                                <option value="">Страна паспорта</option>
+                                {countries.map(country => (
+                                    <option key={country.id} value={country.name}>{country.name}</option>
+                                ))}
+                            </select>
+                            <input type="text" placeholder="Телефон" onChange={e => handlePassengerChange(index, 'phone', e.target.value)} />
+                            <input type="email" placeholder="Email" onChange={e => handlePassengerChange(index, 'email', e.target.value)} />
+                        </div>
+                    ))}
+                    <button onClick={handleAddPassenger}>Добавить пассажира</button>
+                    <button onClick={handleRemovePassenger} disabled={passengerCount <= 1}>Удалить пассажира</button>
+                    <button onClick={handleConfirmBooking}>Подтвердить бронирование</button>
                 </div>
             )}
         </div>

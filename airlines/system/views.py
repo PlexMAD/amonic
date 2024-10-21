@@ -1,3 +1,5 @@
+import random
+import string
 import uuid
 from datetime import timedelta, datetime
 
@@ -228,7 +230,6 @@ class SchedulesViewSet(viewsets.ModelViewSet):
             return Response({"detail": "Неверный формат даты. Используйте формат ГГГГ-ММ-ДД."},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        # Если указан поиск +-3 дня
         if include_nearby_days:
             start_date = selected_date - timedelta(days=3)
             end_date = selected_date + timedelta(days=3)
@@ -250,6 +251,21 @@ class SchedulesViewSet(viewsets.ModelViewSet):
         else:
             return Response({"detail": "Нет доступных рейсов на указанную дату."}, status=status.HTTP_404_NOT_FOUND)
 
+    @action(detail=False, methods=['get'], url_path='search-by-id')
+    def search_by_id(self, request):
+        schedule_id = request.query_params.get('id')
+
+        if not schedule_id:
+            return Response({"detail": "Необходимо указать id расписания."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            schedule = self.queryset.get(id=schedule_id)
+        except Schedules.DoesNotExist:
+            return Response({"detail": "Расписание с таким id не найдено."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(schedule)
+        return Response(serializer.data)
+
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
@@ -270,25 +286,46 @@ class TicketViewSet(viewsets.ModelViewSet):
     queryset = Tickets.objects.all()
     serializer_class = TicketsSerializer
 
+    @action(detail=False, methods=['get'], url_path='search')
+    def search(self, request):
+        booking_reference = request.query_params.get('booking_reference', None)
+        print(booking_reference)
+        if booking_reference is not None:
+            tickets = self.queryset.filter(booking_reference=booking_reference)
+            serializer = self.get_serializer(tickets, many=True)
+            return Response(serializer.data)
+        return Response({"detail": "Please provide a booking reference."}, status=400)
+
 
 class TicketCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def generate_booking_reference(self, length=6):
+        characters = string.ascii_letters + string.digits
+        return ''.join(random.choice(characters) for _ in range(length))
+
     def post(self, request):
         passengers_data = request.data.get('passengers', [])
-        booking_reference = self.generate_booking_reference()
+        has_return_trip = request.data.get('has_return_trip', False)
         tickets = []
 
+        # Проверка на наличие пассажиров
+        if not passengers_data:
+            return Response({"error": "Пассажиры не указаны."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Создание билетов на рейс туда и обратно
         for passenger in passengers_data:
             country_name = passenger.get('passport_country')
-            print(country_name)
             country = Countries.objects.filter(name=country_name).first()
-            print(country)
 
             if not country:
                 return Response({"error": f"Country '{country_name}' not found."}, status=status.HTTP_400_BAD_REQUEST)
 
-            serializer = TicketCreateSerializer(data={
+            # Генерация уникального номера бронирования для каждого пассажира
+            booking_reference = self.generate_booking_reference()
+
+            # Создаем билет на рейс туда
+            outbound_serializer = TicketCreateSerializer(data={
                 **passenger,
                 'booking_reference': booking_reference,
                 'scheduleid': request.data.get('flight'),
@@ -297,18 +334,35 @@ class TicketCreateView(APIView):
                 'passport_country': country.id,
             }, context={'request': request})
 
-            if serializer.is_valid():
-                tickets.append(serializer.save())
+            if outbound_serializer.is_valid():
+                outbound_ticket = outbound_serializer.save()
+                tickets.append(outbound_ticket)
             else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(outbound_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+            # Если есть обратный рейс, создаем билет на обратный рейс
+            if has_return_trip:
+                return_serializer = TicketCreateSerializer(data={
+                    **passenger,
+                    'booking_reference': booking_reference,  # Один общий номер для обратного рейса
+                    'scheduleid': request.data.get('returnFlight'),
+                    'cabintypeid': request.data.get('cabintypeid'),
+                    'confirmed': True,
+                    'passport_country': country.id,
+                }, context={'request': request})
+
+                if return_serializer.is_valid():
+                    return_ticket = return_serializer.save()
+                    tickets.append(return_ticket)
+                else:
+                    return Response(return_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Возвращаем идентификаторы билетов
         return Response({
             'tickets': [ticket.id for ticket in tickets],
-            'booking_number': booking_reference
+            'booking_numbers': [self.generate_booking_reference() for _ in tickets],
+            # Уникальные номера для каждого пассажира
         }, status=status.HTTP_201_CREATED)
-
-    def generate_booking_reference(self):
-        return str(uuid.uuid4())
 
 
 class Surveys0ViewSet(viewsets.ModelViewSet):

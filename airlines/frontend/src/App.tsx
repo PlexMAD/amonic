@@ -11,6 +11,7 @@ import Footer from './components/footer'; // Импорт футера
 import FlightSearch from './components/FlightSearch';
 import FlightSatisfactionReport from './components/FlightSatisfactionReport';
 import FullReport from './components/FullReport';
+import AmenitiesBuyPage from './components/AmenitiesBuyPage';
 const App: React.FC = () => {
   const [userRole, setUserRole] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -61,6 +62,7 @@ const App: React.FC = () => {
         <Route path="/tickets" element={<PrivateRoute component={FlightSearch} role={2} userRole={userRole} />} />
         <Route path="/reports" element={<PrivateRoute component={FlightSatisfactionReport} role={2} userRole={userRole} />} />
         <Route path="/full_report" element={<PrivateRoute component={FullReport} role={2} userRole={userRole} />} />
+        <Route path="/amenities" element={<PrivateRoute component={AmenitiesBuyPage} role={2} userRole={userRole} />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       <Footer />

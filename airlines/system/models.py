@@ -186,3 +186,30 @@ class Surveys0(models.Model):
 
     class Meta:
         db_table = 'surveys0'
+
+
+class Amenities(models.Model):
+    id = models.AutoField(db_column='ID', primary_key=True)
+    service = models.TextField(db_column='Service')
+    price = models.DecimalField(db_column='Price', max_digits=10, decimal_places=2)
+
+    class Meta:
+        db_table = 'amenities'
+
+
+class AmenitiesTickets(models.Model):
+    amenityid = models.ForeignKey(Amenities, models.DO_NOTHING, db_column='AmenityID')
+    ticketid = models.ForeignKey(Tickets, models.DO_NOTHING, db_column='TicketID')
+    price = models.DecimalField(db_column='Price', max_digits=10, decimal_places=2)
+
+    class Meta:
+        db_table = 'amenities_tickets'
+
+
+class AmenitiesCabintype(models.Model):
+    amenityid = models.ForeignKey(Amenities, models.DO_NOTHING, db_column='AmenityID')
+    cabintypeid = models.ForeignKey(CabinTypes, models.DO_NOTHING, db_column='CabinTypeID')
+
+    class Meta:
+        db_table = 'amenities_cabin_type'
+        managed = True
