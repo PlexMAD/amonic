@@ -177,6 +177,8 @@ const FlightSearch = () => {
 
     return (
         <div className="flight-search">
+            <h2 className="flight-search__heading">Поиск рейсов</h2>
+        <div className="flight-search">
             <h2 className="flight-search__title">Поиск рейсов</h2>
             <form className="flight-search__form">
                 <div className="flight-search__form-group">
