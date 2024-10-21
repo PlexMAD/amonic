@@ -103,7 +103,6 @@ const FlightSearch = () => {
         setShowBookingForm(true);
     };
 
-
     const handleConfirmBooking = () => {
         if (!selectedOutboundFlightId) return;
 
