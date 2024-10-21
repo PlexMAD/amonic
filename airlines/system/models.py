@@ -106,10 +106,8 @@ class Airports(models.Model):
 
 class Routes(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True, blank=True)
-    departure_airport = models.ForeignKey(Airports, models.DO_NOTHING, db_column='DepartureAirportID',
-                                          related_name='departure_routes')
-    arrival_airport = models.ForeignKey(Airports, models.DO_NOTHING, db_column='ArrivalAirportID',
-                                        related_name='arrival_routes')
+    departure_airport = models.ForeignKey(Airports, models.DO_NOTHING, db_column='DepartureAirportID', related_name='departure_routes')
+    arrival_airport = models.ForeignKey(Airports, models.DO_NOTHING, db_column='ArrivalAirportID', related_name='arrival_routes')
     distance = models.IntegerField(db_column='Distance')
     flight_time = models.TimeField(db_column='FlightTime')
 
@@ -171,10 +169,8 @@ class Tickets(models.Model):
 
 class Surveys0(models.Model):
     id = models.AutoField(db_column='ID', primary_key=True)
-    departure_airport = models.ForeignKey(Airports, models.DO_NOTHING, db_column='DepartureAirportID',
-                                          related_name='departure_airports')
-    arrival_airport = models.ForeignKey(Airports, models.DO_NOTHING, db_column='ArrivalAirportID',
-                                        related_name='arrival_airports')
+    departure_airport = models.ForeignKey(Airports, models.DO_NOTHING, db_column='DepartureAirportID', related_name='departure_airports')
+    arrival_airport = models.ForeignKey(Airports, models.DO_NOTHING, db_column='ArrivalAirportID', related_name='arrival_airports')
     age = models.IntegerField(db_column='age', blank=True, null=True)
     gender = models.CharField(db_column='gender', max_length=1)
     travel_class = models.ForeignKey(CabinTypes, models.DO_NOTHING, db_column='travel_class')
@@ -193,23 +189,24 @@ class Amenities(models.Model):
     service = models.TextField(db_column='Service')
     price = models.DecimalField(db_column='Price', max_digits=10, decimal_places=2)
 
+    cabin_types = models.ManyToManyField('CabinTypes', through='AmenitiesCabinType', related_name='amenities')
+
     class Meta:
         db_table = 'amenities'
 
 
+class AmenitiesCabinType(models.Model):
+    amenity = models.ForeignKey(Amenities, models.DO_NOTHING, db_column='AmenityID')
+    cabin_type = models.ForeignKey(CabinTypes, models.DO_NOTHING, db_column='CabinTypeID')
+
+    class Meta:
+        db_table = 'amenities_cabin_types'
+
+
 class AmenitiesTickets(models.Model):
-    amenityid = models.ForeignKey(Amenities, models.DO_NOTHING, db_column='AmenityID')
-    ticketid = models.ForeignKey(Tickets, models.DO_NOTHING, db_column='TicketID')
+    amenity = models.ForeignKey(Amenities, models.DO_NOTHING, db_column='AmenityID')
+    ticket = models.ForeignKey(Tickets, models.DO_NOTHING, db_column='TicketID')
     price = models.DecimalField(db_column='Price', max_digits=10, decimal_places=2)
 
     class Meta:
         db_table = 'amenities_tickets'
-
-
-class AmenitiesCabintype(models.Model):
-    amenityid = models.ForeignKey(Amenities, models.DO_NOTHING, db_column='AmenityID')
-    cabintypeid = models.ForeignKey(CabinTypes, models.DO_NOTHING, db_column='CabinTypeID')
-
-    class Meta:
-        db_table = 'amenities_cabin_type'
-        managed = True

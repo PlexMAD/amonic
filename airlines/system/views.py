@@ -12,10 +12,10 @@ from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
-from .models import Offices, Roles, Airports, Routes, Schedules, Aircrafts, Tickets, Countries, Surveys0
+from .models import Offices, Roles, Airports, Routes, Schedules, Aircrafts, Tickets, Countries, Surveys0, Amenities
 from .serializers import UsersSerializer, OfficesSerializer, UserSessionTrackingSerializer, RoutesSerializer, \
     AirportsSerializer, SchedulesSerializer, AircraftsSerializer, TicketsSerializer, CountriesSerializer, \
-    TicketCreateSerializer, Surveys0Serializer
+    TicketCreateSerializer, Surveys0Serializer, AmenitiesSerializer
 
 User = get_user_model()
 
@@ -368,3 +368,7 @@ class TicketCreateView(APIView):
 class Surveys0ViewSet(viewsets.ModelViewSet):
     queryset = Surveys0.objects.all()
     serializer_class = Surveys0Serializer
+
+class AmenititesViewSet(viewsets.ModelViewSet):
+    queryset = Amenities.objects.all()
+    serializer_class = AmenitiesSerializer
