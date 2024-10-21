@@ -22,7 +22,8 @@ code {
 }
 
 .header__logo img {
-  height: 50px; /* Размер логотипа */
+  height: 150px; /* Размер логотипа */
+  width: 535px;
 }
 
 .header__buttons button {
@@ -527,26 +528,33 @@ code {
 }
 /* FlightScheduleManager */
 /* FlightSearch */
+/* Основные стили для формы поиска рейсов */
 .flight-search {
-  max-width: 900px; /* Увеличиваем максимальную ширину формы */
-  margin: 40px auto;
-  padding: 30px;
-  background-color: #ffffcc; /* Светло-желтый фон */
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  padding: 20px;
+  background-color: #f5eec5; /* Фон светло-желтого цвета */
+  padding-bottom: 50px;
 }
 
-.flight-search__heading {
+.flight-search__title {
   text-align: center;
-  margin-bottom: 30px;
   font-size: 24px;
+  margin-bottom: 20px;
   color: #333;
-  font-weight: bold;
 }
 
 .flight-search__form {
   display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.flight-search__form-group {
+  display: flex;
   flex-direction: column;
+  width: 300px;
 }
 
 .flight-search__label {
@@ -554,13 +562,11 @@ code {
   margin-bottom: 5px;
 }
 
-.flight-search__input,
-.flight-search__select {
-  padding: 12px;
-  border: 1px solid #000;
-  background-color: #ffffe0;
-  margin-bottom: 20px;
-  border-radius: 5px;
+.flight-search__select,
+.flight-search__input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   font-size: 16px;
 }
 
@@ -568,154 +574,125 @@ code {
   margin-right: 10px;
 }
 
-/* Стили кнопки поиска */
 .flight-search__button {
-  background-color: #4CAF50;
+  margin-right: 10px;
+  padding: 10px 20px;
+  background-color: #4caf50;
   color: white;
-  padding: 12px 20px;
   border: none;
-  border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
-  margin-bottom: 20px;
-  text-align: center;
+  border-radius: 4px;
+}
+.flight-search__button:last-child {
+  margin-right: 0; /* У последней кнопки не должно быть отступа справа */
 }
 
 .flight-search__button:hover {
   background-color: #45a049;
 }
-
-.flight-search__button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.flight-search__button--delete {
+  background-color: #ff4d4d; /* Красный цвет */
+}
+.flight-search__button--delete:hover {
+  background-color: #e60000; /* Более темный красный при наведении */
+}
+.flight-search__subtitle {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 20px 0 10px;
 }
 
-/* Таблицы для вывода рейсов */
-.flight-search__table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
+.flight-search__list {
+  list-style-type: none;
+  padding: 0;
 }
 
-.flight-search__table-cell {
-  border: 1px solid #000;
-  padding: 12px;
-  text-align: left;
-  font-size: 16px;
+.flight-search__item {
+  background-color: #f9f9f9;
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
 }
 
-.flight-search__table-row.red-row {
-  background-color: #ffcccc;
+.flight-search__item:nth-child(even) {
+  background-color: #f2f2f2;
 }
 
-.flight-search__table-row.green-row {
-  background-color: #ccffcc;
+.flight-search__flight-info {
+  flex-grow: 1;
+  margin-right: 20px;
 }
 
-.flight-search__table-row.yellow-row {
-  background-color: #ffffcc;
+.flight-search__flight-price {
+  margin-right: 20px;
+  font-weight: bold;
+  color: #333;
 }
 
-/* Кнопки выбора рейсов */
-.flight-search__button-choose {
+.flight-search__select-button {
+  padding: 5px 10px;
   background-color: #4CAF50;
   color: white;
-  padding: 8px 16px;
   border: none;
-  border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
+  border-radius: 4px;
+  margin-right: 15px; /* Добавляем отступ от правой стенки */
 }
 
-.flight-search__button-choose:hover {
+.flight-search__select-button:hover {
   background-color: #45a049;
 }
-
-/* Кнопка "Выбран" меняет цвет на желтый */
-.flight-search__button-choose.selected {
-  background-color: #FFD700; /* Желтый цвет */
-  color: black;
+.flight-search__select-button.selected {
+  background-color: orange; /* Оранжевый цвет при выборе */
+  cursor: default;
+}
+.flight-search__select-button.selected::after {
+  content: "Выбрано"; /* Текст после нажатия */
+  color: white;
 }
 
-.flight-search__button-choose.selected:hover {
-  background-color: #FFC700;
+.flight-search__booking-form {
+  background-color: #fff3f3;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
-/* Добавляем стили для формы пассажиров */
 .flight-search__passenger-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 15px;
-  margin-bottom: 30px;
-}
-
-.flight-search__passenger-block {
-  grid-column: 1 / -1; /* Пассажир занимает всю строку */
   margin-bottom: 20px;
 }
 
-.flight-search__passenger-block h3 {
-  grid-column: 1 / -1;
-  text-align: center;
-}
-
-.flight-search__input,
-.flight-search__select {
-  padding: 10px;
-  border: 1px solid #000;
-  background-color: #ffffe0;
-  border-radius: 5px;
-  font-size: 16px;
+.flight-search__input {
+  margin-bottom: 10px;
   width: 100%;
+  box-sizing: border-box;
 }
 
-.flight-search__label {
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.flight-search__button-add-passenger,
-.flight-search__button-remove-passenger,
-.flight-search__button-close,
-.flight-search__button-confirm-booking {
-  padding: 10px 20px;
-  background-color: #4CAF50;
+/* Стили для действий */
+.flight-search__action-button {
+  background-color: #ffcccc; /* Светло-красный цвет для отмененных рейсов */
   color: white;
   border: none;
-  border-radius: 5px;
+  padding: 5px 10px;
   cursor: pointer;
-  margin-right: 10px;
+  margin-left: 10px;
+  border-radius: 4px;
 }
 
-.flight-search__button-remove-passenger {
-  background-color: #f44336;
+.flight-search__action-button--active {
+  background-color: #4caf50;
 }
 
-.flight-search__button-close {
-  background-color: #f44336;
+.flight-search__action-button--inactive {
+  background-color: #ff0000;
 }
 
-.flight-search__button-add-passenger:hover,
-.flight-search__button-remove-passenger:hover,
-.flight-search__button-close:hover,
-.flight-search__button-confirm-booking:hover {
-  background-color: #45a049;
-}
-
-.flight-search__button-remove-passenger:hover {
-  background-color: #d32f2f;
-}
-
-.flight-search__button-close:hover {
-  background-color: #d32f2f;
-}
-
-/* Выравнивание кнопок внизу */
-.flight-search__buttons-container {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-}
 /* FlightSearch */
 /* FlightReport */
 .report {
