@@ -1,6 +1,7 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
-from .models import Users, Offices, UserSessionTracking, Schedules, Aircrafts, Airports, Routes, Tickets, Countries
+from .models import Users, Offices, UserSessionTracking, Schedules, Aircrafts, Airports, Routes, Tickets, Countries, \
+    Surveys0, CabinTypes
 from django.core.cache import cache
 from rest_framework import status
 from rest_framework import serializers
@@ -119,3 +120,19 @@ class TicketCreateSerializer(serializers.ModelSerializer):
         validated_data['userid'] = user
 
         return super().create(validated_data)
+
+
+class CabinTypesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CabinTypes
+        fields = ['id', 'name']
+
+
+class Surveys0Serializer(serializers.ModelSerializer):
+    departure_airport = AirportsSerializer()
+    arrival_airport = AirportsSerializer()
+    travel_class = CabinTypesSerializer()
+
+    class Meta:
+        model = Surveys0
+        fields = '__all__'

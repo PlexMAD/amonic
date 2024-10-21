@@ -9,6 +9,8 @@ import FlightScheduleManagement from './components/FlightScheduleManager';
 import Header from './components/header'; // Импорт хедера
 import Footer from './components/footer'; // Импорт футера
 import FlightSearch from './components/FlightSearch';
+import FlightSatisfactionReport from './components/FlightSatisfactionReport';
+import FullReport from './components/FullReport';
 const App: React.FC = () => {
   const [userRole, setUserRole] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -57,6 +59,8 @@ const App: React.FC = () => {
         <Route path="/user-panel" element={<PrivateRoute component={UserPanel} role={2} userRole={userRole} />} />
         <Route path="/schedules" element={<PrivateRoute component={FlightScheduleManagement} role={2} userRole={userRole} />} />
         <Route path="/tickets" element={<PrivateRoute component={FlightSearch} role={2} userRole={userRole} />} />
+        <Route path="/reports" element={<PrivateRoute component={FlightSatisfactionReport} role={2} userRole={userRole} />} />
+        <Route path="/full_report" element={<PrivateRoute component={FullReport} role={2} userRole={userRole} />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       <Footer />

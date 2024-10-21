@@ -167,3 +167,22 @@ class Tickets(models.Model):
 
     class Meta:
         db_table = 'tickets'
+
+
+class Surveys0(models.Model):
+    id = models.AutoField(db_column='ID', primary_key=True)
+    departure_airport = models.ForeignKey(Airports, models.DO_NOTHING, db_column='DepartureAirportID',
+                                          related_name='departure_airports')
+    arrival_airport = models.ForeignKey(Airports, models.DO_NOTHING, db_column='ArrivalAirportID',
+                                        related_name='arrival_airports')
+    age = models.IntegerField(db_column='age', blank=True, null=True)
+    gender = models.CharField(db_column='gender', max_length=1)
+    travel_class = models.ForeignKey(CabinTypes, models.DO_NOTHING, db_column='travel_class')
+    q1 = models.IntegerField(db_column='q1', blank=True, null=True)
+    q2 = models.IntegerField(db_column='q2', blank=True, null=True)
+    q3 = models.IntegerField(db_column='q3', blank=True, null=True)
+    q4 = models.IntegerField(db_column='q4', blank=True, null=True)
+    survey_month = models.CharField(db_column='survey_month', max_length=20)
+
+    class Meta:
+        db_table = 'surveys0'
