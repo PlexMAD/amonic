@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import '../index.css'; // Подключаем файл с кастомными стилями
 
 interface Airport {
     id: number;
@@ -39,10 +39,10 @@ const FullReport: React.FC = () => {
 
     const processFullReportData = (surveyData: Survey[]) => {
         const report: any[] = [
-            { question: 'Please rate our aircraft', answers: Array(6).fill(0).map(() => Array(7).fill(0)) },
-            { question: 'How would you rate our flight attendants', answers: Array(6).fill(0).map(() => Array(7).fill(0)) },
-            { question: 'How would you rate our inflight entertainment', answers: Array(6).fill(0).map(() => Array(7).fill(0)) },
-            { question: 'Please rate the ticket price', answers: Array(6).fill(0).map(() => Array(7).fill(0)) },
+            { question: 'Оцените наш самолет', answers: Array(6).fill(0).map(() => Array(7).fill(0)) },
+            { question: 'Как бы вы оценили наших бортпроводников?', answers: Array(6).fill(0).map(() => Array(7).fill(0)) },
+            { question: 'Как бы вы оценили нашу систему развлечений на борту?', answers: Array(6).fill(0).map(() => Array(7).fill(0)) },
+            { question: 'Оцените цену билета', answers: Array(6).fill(0).map(() => Array(7).fill(0)) },
         ];
 
         surveyData.forEach(survey => {
@@ -55,7 +55,6 @@ const FullReport: React.FC = () => {
             
             report.forEach((question, i) => {
                 if (indices[i] >= 0 && indices[i] <= 6) {
-                    // Assume we are counting answers by gender
                     const genderIndex = survey.gender === 'M' ? 0 : 1; 
                     question.answers[genderIndex][indices[i]]++;
                 }
@@ -69,25 +68,25 @@ const FullReport: React.FC = () => {
         if (!fullReport.length) return null;
 
         return (
-            <table className="table table-bordered">
+            <table className="full-report__table">
                 <thead>
-                    <tr>
-                        <th>Question</th>
-                        <th>Замечательно</th>
-                        <th>Очень хорошо</th>
-                        <th>Хорошо</th>
-                        <th>Нормально</th>
-                        <th>Требует  улучшение</th>
-                        <th>Плохо</th>
-                        <th>Не знаю</th>
+                    <tr className="full-report__header-row">
+                        <th className="full-report__header-cell">Вопрос</th>
+                        <th className="full-report__header-cell">Замечательно</th>
+                        <th className="full-report__header-cell">Очень хорошо</th>
+                        <th className="full-report__header-cell">Хорошо</th>
+                        <th className="full-report__header-cell">Нормально</th>
+                        <th className="full-report__header-cell">Требует улучшение</th>
+                        <th className="full-report__header-cell">Плохо</th>
+                        <th className="full-report__header-cell">Не знаю</th>
                     </tr>
                 </thead>
                 <tbody>
                     {fullReport.map((item, index) => (
-                        <tr key={index}>
-                            <td>{item.question}</td>
+                        <tr key={index} className="full-report__row">
+                            <td className="full-report__cell">{item.question}</td>
                             {item.answers[0].map((count: number, i: number) => (
-                                <td key={i}>{count}</td>
+                                <td key={i} className="full-report__cell">{count}</td>
                             ))}
                         </tr>
                     ))}
@@ -97,8 +96,8 @@ const FullReport: React.FC = () => {
     };
 
     return (
-        <div className="container">
-            <h1>Flight Satisfaction Full Report</h1>
+        <div className="full-report">
+            <h1 className="full-report__title">Полный отчет об удовлетворенности полетом</h1>
             {renderReportTable()}
         </div>
     );

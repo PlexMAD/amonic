@@ -17,15 +17,25 @@ const Header: React.FC = () => {
     navigate('/tickets'); // Добавьте путь для страницы тикетов
   };
 
+  const handleNavigateToReports = () => {
+    navigate('/reports'); // Добавьте путь для страницы тикетов
+  };
+  const handleNavigateToAmenities = () => {
+    navigate('/amenities'); // Добавьте путь для страницы тикетов
+  };
+
   return (
     <header className="header">
       <div className="header__logo">
-        <img src="..\logo.svg" alt="Логотип" /> {/*путь к логотипу */}
+        <img src="./airlines/frontend/logo.png" alt="" /> {/*путь к логотипу */}
       </div>
       <div className="header__buttons">
         <button onClick={handleNavigateToUserPanel}>Пользовательская панель</button>
         <button onClick={handleNavigateToSchedule}>Расписание рейсов</button>
         <button onClick={handleNavigateToTickets}>Тикеты</button>
+        <button onClick={handleNavigateToReports}>Репорт отчеты</button>
+        <button onClick={handleNavigateToAmenities}>Услуги</button>
+        
       </div>
     </header>
   );

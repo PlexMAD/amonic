@@ -22,7 +22,10 @@ code {
 }
 
 .header__logo img {
-  height: 50px; /* Размер логотипа */
+  height: 150px; /* Размер логотипа */
+  width: 535px;
+  height: 150px; /* Размер логотипа */
+  width: 535px;
 }
 
 .header__buttons button {
@@ -143,6 +146,7 @@ code {
   background-color: #fff8b5;
   padding: 20px;
   font-family: Arial, sans-serif;
+  margin-bottom: 60px;
 }
 
 .user-panel__title {
@@ -527,28 +531,44 @@ code {
 }
 /* FlightScheduleManager */
 /* FlightSearch */
+/* Основные стили для формы поиска рейсов */
+/* Основные стили для формы поиска рейсов */
 .flight-search {
-  max-width: 600px; /* Ограничиваем ширину формы */
-  margin: 40px auto; /* Центрирование и отступ сверху/снизу */
-  padding: 30px;
-  background-color: #ffffcc; /* Светло-желтый фон */
-  border-radius: 10px; /* Скругленные углы */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Легкая тень */
+  width: 100%;
+  padding: 20px;
+  background-color: #f5eec5; /* Фон светло-желтого цвета */
+  padding-bottom: 50px;
 }
 
-/* Заголовок */
-.flight-search__heading {
+.flight-search__title {
   text-align: center;
-  margin-bottom: 30px;
   font-size: 24px;
+  margin-bottom: 20px;
+  margin-bottom: 20px;
   color: #333;
-  font-weight: bold;
 }
 
-/* Стили формы */
 .flight-search__form {
   display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.flight-search__form-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.flight-search__form-group {
+  display: flex;
   flex-direction: column;
+  width: 300px;
+  width: 300px;
 }
 
 .flight-search__label {
@@ -556,13 +576,11 @@ code {
   margin-bottom: 5px;
 }
 
-.flight-search__input,
-.flight-search__select {
-  padding: 10px;
-  border: 1px solid #000;
-  background-color: #ffffe0; /* Светло-желтый фон полей */
-  margin-bottom: 20px;
-  border-radius: 5px;
+.flight-search__select,
+.flight-search__input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   font-size: 16px;
 }
 
@@ -570,56 +588,338 @@ code {
   margin-right: 10px;
 }
 
-/* Кнопки */
 .flight-search__button {
-  background-color: #4CAF50;
+  margin-right: 10px;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  margin-right: 10px;
+  padding: 10px 20px;
+  background-color: #4caf50;
   color: white;
-  padding: 12px 20px;
   border: none;
-  border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
-  margin-bottom: 20px;
-  width: 100%;
-  text-align: center;
+  border-radius: 4px;
+}
+.flight-search__button:last-child {
+  margin-right: 0; /* У последней кнопки не должно быть отступа справа */
 }
 
 .flight-search__button:hover {
   background-color: #45a049;
 }
-
-.flight-search__button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.flight-search__button--delete {
+  background-color: #ff4d4d; /* Красный цвет */
+}
+.flight-search__button--delete:hover {
+  background-color: #e60000; /* Более темный красный при наведении */
+}
+.flight-search__subtitle {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 20px 0 10px;
 }
 
-/* Таблицы */
-.flight-search__table {
+.flight-search__list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.flight-search__item {
+  background-color: #f9f9f9;
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+}
+
+.flight-search__item:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.flight-search__flight-info {
+  flex-grow: 1;
+  margin-right: 20px;
+}
+
+.flight-search__flight-price {
+  margin-right: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+.flight-search__select-button {
+  padding: 5px 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 4px;
+  margin-right: 15px; /* Добавляем отступ от правой стенки */
+}
+
+.flight-search__select-button:hover {
+  background-color: #45a049;
+}
+.flight-search__select-button.selected {
+  background-color: orange; /* Оранжевый цвет при выборе */
+  cursor: default;
+}
+.flight-search__select-button.selected::after {
+  content: "Выбрано"; /* Текст после нажатия */
+  color: white;
+}
+
+.flight-search__booking-form {
+  background-color: #fff3f3;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.flight-search__passenger-form {
+  margin-bottom: 20px;
+}
+
+.flight-search__input {
+  margin-bottom: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Стили для действий */
+.flight-search__action-button {
+  background-color: #ffcccc; /* Светло-красный цвет для отмененных рейсов */
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  margin-left: 10px;
+  border-radius: 4px;
+}
+
+.flight-search__action-button--active {
+  background-color: #4caf50;
+}
+
+.flight-search__action-button--inactive {
+  background-color: #ff0000;
+}
+
+/* FlightSearch */
+/* FlightReport */
+.report {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff8b5; /* Светло-желтый фон */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 100px;
+
+}
+
+.report__header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.report__title {
+  font-size: 32px;
+  color: #333;
+}
+
+.report__subtitle {
+  font-size: 24px;
+  color: #555;
+}
+
+.report__section {
+  margin-bottom: 20px;
+}
+
+.report__section-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.report__table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
-  background-color: #ffffcc;
-  border-radius: 5px;
 }
 
-.flight-search__table-cell {
-  border: 1px solid #000;
-  padding: 12px;
+.report__table-row--header {
+  background-color: #b7b7b7;
+  color: black;
+}
+
+.report__table-header {
+  padding: 10px;
+  border: 1px solid black;
   text-align: left;
+}
+
+.report__table-cell {
+  padding: 10px;
+  border: 1px solid black;
+  background-color: #ffffe0;
+}
+
+.report__list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.report__list-item {
+  font-size: 16px;
+  background-color: #ffffe0;
+  padding: 10px;
+  margin-bottom: 5px;
+  border: 1px solid black;
+}
+
+.report__footer {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.report__button {
+  padding: 12px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
   font-size: 16px;
 }
 
-.flight-search__table-row.red-row {
-  background-color: #ffcccc;
+.report__button:hover {
+  background-color: #45a049;
 }
 
-.flight-search__table-row.green-row {
-  background-color: #ccffcc;
+/* FlightReport */
+/* FUllFlightReport */
+.full-report {
+  max-width: 1200px;
+  margin: 40px auto;
+  background-color: #fff8b5; /* Светло-желтый фон */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.flight-search__table-row.yellow-row {
-  background-color: #ffffcc;
+.full-report__title {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
 }
 
+.full-report__table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffe0; /* Цвет таблицы */
+}
 
-/* FlightSearch */
+.full-report__header-row {
+  background-color: #b7b7b7;
+}
+
+.full-report__header-cell {
+  padding: 10px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+
+.full-report__row {
+  background-color: #fff8b5;
+}
+
+.full-report__cell {
+  padding: 10px;
+  border: 1px solid black;
+  text-align: center;
+}
+
+.full-report__cell:nth-child(even) {
+  background-color: #ffffe0;
+}
+
+.full-report__row:hover {
+  background-color: #f2f2f2;
+}
+
+.full-report__footer {
+  padding-top: 20px;
+  text-align: center;
+}
+
+/* FUllFlightReport */
+/* AmenitiesBuyPage */
+.amenities-page {
+  background-color: #fff7b3; /* светлый фон */
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.amenities-page__search, 
+.amenities-page__flight-select,
+.amenities-page__passenger-info {
+  margin-bottom: 20px;
+}
+
+.amenities-page__search input {
+  margin-left: 10px;
+}
+
+.amenities-page__search button {
+  margin-left: 10px;
+  background-color: #ff8b4a;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.amenities-page__passenger-info h3 {
+  margin-bottom: 10px;
+}
+
+.amenities-page__amenities-list {
+  border: 1px solid #b7b7b7;
+  padding: 10px;
+  background-color: #ffffe0;
+}
+
+.amenities-page__amenity {
+  margin-bottom: 10px;
+}
+
+.amenities-page__summary {
+  margin-top: 20px;
+}
+
+.amenities-page__buttons {
+  margin-top: 20px;
+}
+
+.amenities-page__buttons button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.amenities-page__buttons button:hover {
+  background-color: #45a049;
+}
+
+/* AmenitiesBuyPage */
