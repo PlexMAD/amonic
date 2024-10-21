@@ -7,17 +7,15 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import logout
 from django.contrib.auth.hashers import make_password
 from django.db.models import Q
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, filters
+from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
-from .models import Offices, Roles, Airports, Routes, Schedules, Aircrafts, Tickets, Countries, Surveys0, Amenities, \
-    AmenitiesTickets
+from .models import Offices, Roles, Airports, Routes, Schedules, Aircrafts, Tickets, Countries, Surveys0
 from .serializers import UsersSerializer, OfficesSerializer, UserSessionTrackingSerializer, RoutesSerializer, \
     AirportsSerializer, SchedulesSerializer, AircraftsSerializer, TicketsSerializer, CountriesSerializer, \
-    TicketCreateSerializer, Surveys0Serializer, AmenitiesSerializer, AmenitiesTicketsSerializer
+    TicketCreateSerializer, Surveys0Serializer
 
 User = get_user_model()
 
@@ -370,30 +368,3 @@ class TicketCreateView(APIView):
 class Surveys0ViewSet(viewsets.ModelViewSet):
     queryset = Surveys0.objects.all()
     serializer_class = Surveys0Serializer
-
-
-class AmenitiesViewSet(viewsets.ModelViewSet):
-    queryset = Amenities.objects.all()
-    serializer_class = AmenitiesSerializer
-
-
-class AmenitiesTicketsViewSet(viewsets.ModelViewSet):
-    queryset = AmenitiesTickets.objects.all()
-    serializer_class = AmenitiesTicketsSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['ticket']
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        ticket_id = self.request.query_params.get('ticket', None)
-        if ticket_id is not None:
-            queryset = queryset.filter(ticket_id=ticket_id)
-        return queryset
-
-    def destroy(self, request, pk=None):
-        try:
-            amenity_ticket = self.get_object()
-            amenity_ticket.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except AmenitiesTickets.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
