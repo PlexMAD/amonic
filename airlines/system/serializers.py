@@ -1,7 +1,7 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from .models import Users, Offices, UserSessionTracking, Schedules, Aircrafts, Airports, Routes, Tickets, Countries, \
-    Surveys0, CabinTypes, Amenities
+    Surveys0, CabinTypes, Amenities, AmenitiesTickets
 from django.core.cache import cache
 from rest_framework import status
 from rest_framework import serializers
@@ -141,4 +141,10 @@ class Surveys0Serializer(serializers.ModelSerializer):
 class AmenitiesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Amenities
+        fields = '__all__'
+
+
+class AmenitiesTicketsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AmenitiesTickets
         fields = '__all__'

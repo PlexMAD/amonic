@@ -21,7 +21,8 @@ router.register(r'aircrafts', AicraftsViewSet, basename='aircrafts')
 router.register(r'tickets', TicketViewSet, basename='tickets')
 router.register(r'countries', CountriesViewSet, basename='countries')
 router.register(r'surveys0', Surveys0ViewSet)
-router.register(r'amenities', AmenititesViewSet)
+router.register(r'amenities', AmenitiesViewSet)
+router.register(r'amenitiestickets', AmenitiesTicketsViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),

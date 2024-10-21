@@ -114,7 +114,9 @@ const AmenitiesBuyPage: React.FC = () => {
     const calculateTotalPrice = () => {
         return amenities.reduce((total, amenity) => {
             const price = parseFloat(amenity.price);
-            if (selectedAmenities[amenity.id] && price > 0) {
+            const isFreeForCabin = selectedTicket && amenity.cabin_types.includes(selectedTicket.cabintypeid);
+
+            if (selectedAmenities[amenity.id] && price > 0 && !isFreeForCabin) {
                 return total + price;
             }
             return total;
@@ -125,6 +127,32 @@ const AmenitiesBuyPage: React.FC = () => {
     const tax = totalPrice * 0.05;
     const totalPayable = totalPrice + tax;
     const selectedCount = Object.values(selectedAmenities).filter(Boolean).length;
+
+    const handleSaveAndConfirm = () => {
+        if (!selectedTicket) {
+            setErrorMessage('No ticket selected.');
+            return;
+        }
+
+        const selectedAmenitiesList = amenities.filter(amenity => selectedAmenities[amenity.id]);
+        
+        selectedAmenitiesList.forEach(async (amenity) => {
+            const price = parseFloat(amenity.price);
+            const isFreeForCabin = selectedTicket && amenity.cabin_types.includes(selectedTicket.cabintypeid);
+            const finalPrice = isFreeForCabin ? 0 : price + (price * 0.05); // Price with tax if applicable
+
+            try {
+                await axios.post('http://127.0.0.1:8000/api/amenitiestickets/', {
+                    amenity: amenity.id,
+                    ticket: selectedTicket.id,
+                    price: finalPrice.toFixed(2),
+                });
+                console.log(`Amenity ${amenity.service} saved for ticket ${selectedTicket.id} with price ${finalPrice}`);
+            } catch (error) {
+                console.error(`Error saving amenity ${amenity.service}:`, error);
+            }
+        });
+    };
 
     return (
         <div>
@@ -170,16 +198,18 @@ const AmenitiesBuyPage: React.FC = () => {
                     <div>
                         {amenities.map(amenity => {
                             const price = parseFloat(amenity.price);
+                            const isFreeForCabin = selectedTicket && amenity.cabin_types.includes(selectedTicket.cabintypeid);
+                            const displayedPrice = isFreeForCabin ? 0 : price;
 
                             return (
                                 <div key={amenity.id}>
                                     <input 
                                         type="checkbox" 
-                                        checked={price === 0 || !!selectedAmenities[amenity.id]} 
-                                        disabled={price === 0} 
-                                        onChange={() => handleAmenityChange(amenity.id, price)}
+                                        checked={displayedPrice === 0 || !!selectedAmenities[amenity.id]} 
+                                        disabled={displayedPrice === 0} 
+                                        onChange={() => handleAmenityChange(amenity.id, displayedPrice)}
                                     /> 
-                                    {amenity.service} {price > 0 ? `($${price})` : '(Free)'}
+                                    {amenity.service} {displayedPrice > 0 ? `($${displayedPrice})` : '(Free)'}
                                 </div>
                             );
                         })}
@@ -196,7 +226,7 @@ const AmenitiesBuyPage: React.FC = () => {
             )}
 
             <div style={{ marginTop: '10px' }}>
-                <button>Save and Confirm</button>
+                <button onClick={handleSaveAndConfirm}>Save and Confirm</button>
                 <button style={{ marginLeft: '10px' }}>Exit</button>
             </div>
         </div>
