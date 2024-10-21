@@ -45,6 +45,7 @@ const AmenitiesBuyPage: React.FC = () => {
     const [amenities, setAmenities] = useState<Amenity[]>([]);
     const [selectedAmenities, setSelectedAmenities] = useState<{ [key: number]: boolean }>({});
     const [selectedSchedule, setSelectedSchedule] = useState<number | null>(null);
+    const [deletionMessage, setDeletionMessage] = useState<string>(''); // Message for deletion confirmation
 
     useEffect(() => {
         axios.get('http://127.0.0.1:8000/api/amenities/')
@@ -77,6 +78,7 @@ const AmenitiesBuyPage: React.FC = () => {
                     const scheduleIds = fetchedTickets.map((ticket: Ticket) => ticket.scheduleid);
                     fetchSchedulesSequentially(scheduleIds);
                     setSelectedTicket(fetchedTickets[0]);
+                    fetchPurchasedAmenities(fetchedTickets[0].id); // Fetch purchased amenities for the selected ticket
                 }
             })
             .catch(error => {
@@ -102,12 +104,69 @@ const AmenitiesBuyPage: React.FC = () => {
         setSchedules(fetchedSchedules);
     };
 
+    const fetchPurchasedAmenities = async (ticketId: number) => {
+        try {
+            const response = await axios.get(`http://127.0.0.1:8000/api/amenitiestickets/`, {
+                params: { ticket: ticketId } // Assuming your backend can filter by ticket ID
+            });
+
+            const purchasedAmenities = response.data;
+            const updatedSelectedAmenities = { ...selectedAmenities };
+
+            purchasedAmenities.forEach((item: { amenity: number }) => {
+                updatedSelectedAmenities[item.amenity] = true; // Mark as selected
+            });
+
+            setSelectedAmenities(updatedSelectedAmenities);
+        } catch (error) {
+            console.error('Error fetching purchased amenities:', error);
+        }
+    };
+
     const handleAmenityChange = (id: number, price: number) => {
         if (price > 0) {
             setSelectedAmenities((prevState) => ({
                 ...prevState,
                 [id]: !prevState[id]
             }));
+        }
+    };
+
+    const handleRemoveAmenity = async (amenityId: number) => {
+        if (!selectedTicket) return;
+
+        try {
+            const ticketAmenityId = await fetchTicketAmenityId(selectedTicket.id, amenityId); 
+
+            if (ticketAmenityId) {
+                await axios.delete(`http://127.0.0.1:8000/api/amenitiestickets/${ticketAmenityId}/`); // Delete request
+
+                // Update local state to remove the deleted amenity
+                setSelectedAmenities((prevState) => {
+                    const newState = { ...prevState };
+                    delete newState[amenityId]; // Remove the selected amenity
+                    return newState;
+                });
+
+                setDeletionMessage(`Amenity has been removed successfully.`); // Set deletion confirmation message
+            }
+        } catch (error) {
+            console.error(`Error removing amenity with id ${amenityId}:`, error);
+        }
+    };
+
+    const fetchTicketAmenityId = async (ticketId: number, amenityId: number): Promise<number | null> => {
+        try {
+            const response = await axios.get(`http://127.0.0.1:8000/api/amenitiestickets/`, {
+                params: { ticket: ticketId }
+            });
+            
+            const amenityTicket = response.data.find((item: { amenity: number }) => item.amenity === amenityId);
+            
+            return amenityTicket ? amenityTicket.id : null; // Return the amenity ticket ID
+        } catch (error) {
+            console.error('Error fetching ticket amenity ID:', error);
+            return null;
         }
     };
 
@@ -152,6 +211,8 @@ const AmenitiesBuyPage: React.FC = () => {
                 console.error(`Error saving amenity ${amenity.service}:`, error);
             }
         });
+
+        window.location.reload(); // Refresh the page after saving
     };
 
     return (
@@ -168,6 +229,7 @@ const AmenitiesBuyPage: React.FC = () => {
             </div>
 
             {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+            {deletionMessage && <p style={{ color: 'green' }}>{deletionMessage}</p>} {/* Display deletion message */}
 
             {selectedTicket && (
                 <div>
@@ -207,7 +269,13 @@ const AmenitiesBuyPage: React.FC = () => {
                                         type="checkbox" 
                                         checked={displayedPrice === 0 || !!selectedAmenities[amenity.id]} 
                                         disabled={displayedPrice === 0} 
-                                        onChange={() => handleAmenityChange(amenity.id, displayedPrice)}
+                                        onChange={() => {
+                                            if (selectedAmenities[amenity.id]) {
+                                                handleRemoveAmenity(amenity.id);
+                                            } else {
+                                                handleAmenityChange(amenity.id, displayedPrice);
+                                            }
+                                        }}
                                     /> 
                                     {amenity.service} {displayedPrice > 0 ? `($${displayedPrice})` : '(Free)'}
                                 </div>
@@ -227,7 +295,6 @@ const AmenitiesBuyPage: React.FC = () => {
 
             <div style={{ marginTop: '10px' }}>
                 <button onClick={handleSaveAndConfirm}>Save and Confirm</button>
-                <button style={{ marginLeft: '10px' }}>Exit</button>
             </div>
         </div>
     );

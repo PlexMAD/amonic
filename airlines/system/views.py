@@ -389,3 +389,11 @@ class AmenitiesTicketsViewSet(viewsets.ModelViewSet):
         if ticket_id is not None:
             queryset = queryset.filter(ticket_id=ticket_id)
         return queryset
+
+    def destroy(self, request, pk=None):
+        try:
+            amenity_ticket = self.get_object()
+            amenity_ticket.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except AmenitiesTickets.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
