@@ -48,7 +48,6 @@ const FlightSearch = () => {
             .catch(error => console.error(error));
     }, []);
 
-
     useEffect(() => {
         axios.get('http://127.0.0.1:8000/api/airports/')
             .then(response => setAirports(response.data))
@@ -72,8 +71,6 @@ const FlightSearch = () => {
                     console.error(error);
                 }
             });
-
-
 
         if (isRoundTrip && returnDate) {
             axios.get('http://127.0.0.1:8000/api/schedules/search/', {
@@ -106,6 +103,7 @@ const FlightSearch = () => {
     const handleBooking = () => {
         setShowBookingForm(true);
     };
+
     const handleConfirmBooking = () => {
         if (!selectedOutboundFlight) return;
 
@@ -126,9 +124,7 @@ const FlightSearch = () => {
 
         const token = localStorage.getItem('access_token');
 
-
         const bookingRequests = [];
-
 
         bookingRequests.push(
             axios.post('http://127.0.0.1:8000/api/create-ticket/', bookingData, {
@@ -137,7 +133,6 @@ const FlightSearch = () => {
                 },
             })
         );
-
 
         if (isRoundTrip && selectedReturnFlight) {
             const returnBookingData = {
@@ -176,7 +171,6 @@ const FlightSearch = () => {
             });
     };
 
-
     const calculatePrice = (economyPrice: number) => {
         if (cabinType === 'business') {
             return Math.round(economyPrice * 1.35);
@@ -188,7 +182,7 @@ const FlightSearch = () => {
     };
 
     return (
-                <div className="flight-search">
+        <div className="flight-search">
             <h2 className="flight-search__heading">Поиск рейсов</h2>
             <form className="flight-search__form">
                 <div>
@@ -276,7 +270,10 @@ const FlightSearch = () => {
                                     <td className="flight-search__table-cell">{flight.to_airport.name}</td>
                                     <td className="flight-search__table-cell">{calculatePrice(flight.economy_price)} руб.</td>
                                     <td className="flight-search__table-cell">
-                                        <button className="flight-search__button" onClick={() => handleSelectOutboundFlight(flight)}>
+                                        <button
+                                            className={`flight-search__button-choose ${selectedOutboundFlight?.id === flight.id ? 'selected' : ''}`}
+                                            onClick={() => handleSelectOutboundFlight(flight)}
+                                        >
                                             {selectedOutboundFlight?.id === flight.id ? 'Выбран' : 'Выбрать'}
                                         </button>
                                     </td>
@@ -310,7 +307,10 @@ const FlightSearch = () => {
                                     <td className="flight-search__table-cell">{flight.to_airport.name}</td>
                                     <td className="flight-search__table-cell">{calculatePrice(flight.economy_price)} руб.</td>
                                     <td className="flight-search__table-cell">
-                                        <button className="flight-search__button" onClick={() => handleSelectReturnFlight(flight)}>
+                                        <button
+                                            className={`flight-search__button-choose ${selectedReturnFlight?.id === flight.id ? 'selected' : ''}`}
+                                            onClick={() => handleSelectReturnFlight(flight)}
+                                        >
                                             {selectedReturnFlight?.id === flight.id ? 'Выбран' : 'Выбрать'}
                                         </button>
                                     </td>
