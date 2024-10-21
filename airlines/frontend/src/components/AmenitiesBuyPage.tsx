@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface Ticket {
     id: number;
@@ -7,7 +7,7 @@ interface Ticket {
     last_name: string;
     email: string;
     phone: string;
-    confirmed: Boolean;
+    confirmed: boolean;
     cabintypeid: number;
     userid: number;
     scheduleid: number;
@@ -26,13 +26,37 @@ interface Schedule {
     confirmed: boolean;
     from_airport: { name: string };
     to_airport: { name: string };
+    time: string;
+}
+
+interface Amenity {
+    id: number;
+    service: string;
+    price: string;
+    cabin_types: number[];
 }
 
 const AmenitiesBuyPage: React.FC = () => {
     const [tickets, setTickets] = useState<Ticket[]>([]);
-    const [schedules, setSchedules] = useState<Schedule[]>([]); // Для хранения данных о маршрутах
-    const [bookingReference, setBookingReference] = useState<string>(''); // Стейт для номера бронирования
-    const [errorMessage, setErrorMessage] = useState<string>(''); // Стейт для ошибок
+    const [schedules, setSchedules] = useState<Schedule[]>([]);
+    const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+    const [bookingReference, setBookingReference] = useState<string>('');
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [amenities, setAmenities] = useState<Amenity[]>([]);
+    const [selectedAmenities, setSelectedAmenities] = useState<{ [key: number]: boolean }>({});
+    const [selectedSchedule, setSelectedSchedule] = useState<number | null>(null);
+    const [deletionMessage, setDeletionMessage] = useState<string>(''); // Message for deletion confirmation
+
+    useEffect(() => {
+        axios.get('http://127.0.0.1:8000/api/amenities/')
+            .then(response => {
+                setAmenities(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching amenities:', error);
+                setErrorMessage('Failed to fetch amenities.');
+            });
+    }, []);
 
     const handleSearch = () => {
         if (bookingReference.trim() === '') {
@@ -40,7 +64,6 @@ const AmenitiesBuyPage: React.FC = () => {
             return;
         }
 
-        // Запрос на получение данных о билетах по номеру бронирования
         axios.get('http://127.0.0.1:8000/api/tickets/search', {
             params: {
                 booking_reference: bookingReference,
@@ -49,12 +72,13 @@ const AmenitiesBuyPage: React.FC = () => {
             .then(response => {
                 const fetchedTickets = response.data;
                 setTickets(fetchedTickets);
-                setErrorMessage(''); // Очищаем сообщение об ошибке, если запрос успешен
-                
-                // Если билеты найдены, делаем запросы на получение маршрутов по scheduleid
+                setErrorMessage('');
+
                 if (fetchedTickets.length > 0) {
                     const scheduleIds = fetchedTickets.map((ticket: Ticket) => ticket.scheduleid);
-                    fetchSchedulesSequentially(scheduleIds); // Изменили вызов на последовательные запросы
+                    fetchSchedulesSequentially(scheduleIds);
+                    setSelectedTicket(fetchedTickets[0]);
+                    fetchPurchasedAmenities(fetchedTickets[0].id); // Fetch purchased amenities for the selected ticket
                 }
             })
             .catch(error => {
@@ -63,28 +87,136 @@ const AmenitiesBuyPage: React.FC = () => {
             });
     };
 
-    // Функция для последовательного выполнения запросов для каждого scheduleid
     const fetchSchedulesSequentially = async (scheduleIds: number[]) => {
         const fetchedSchedules: Schedule[] = [];
 
-        // Используем Promise.all чтобы сделать запросы последовательно
         for (const id of scheduleIds) {
             try {
                 const response = await axios.get(`http://127.0.0.1:8000/api/schedules/search-by-id`, {
                     params: { id }
                 });
-                fetchedSchedules.push(response.data); // Добавляем каждый маршрут в список
+                fetchedSchedules.push(response.data);
             } catch (error) {
                 console.error(`Error fetching schedule with id ${id}:`, error);
             }
         }
 
-        setSchedules(fetchedSchedules); // Устанавливаем все маршруты после завершения всех запросов
+        setSchedules(fetchedSchedules);
+    };
+
+    const fetchPurchasedAmenities = async (ticketId: number) => {
+        try {
+            const response = await axios.get(`http://127.0.0.1:8000/api/amenitiestickets/`, {
+                params: { ticket: ticketId } // Assuming your backend can filter by ticket ID
+            });
+
+            const purchasedAmenities = response.data;
+            const updatedSelectedAmenities = { ...selectedAmenities };
+
+            purchasedAmenities.forEach((item: { amenity: number }) => {
+                updatedSelectedAmenities[item.amenity] = true; // Mark as selected
+            });
+
+            setSelectedAmenities(updatedSelectedAmenities);
+        } catch (error) {
+            console.error('Error fetching purchased amenities:', error);
+        }
+    };
+
+    const handleAmenityChange = (id: number, price: number) => {
+        if (price > 0) {
+            setSelectedAmenities((prevState) => ({
+                ...prevState,
+                [id]: !prevState[id]
+            }));
+        }
+    };
+
+    const handleRemoveAmenity = async (amenityId: number) => {
+        if (!selectedTicket) return;
+
+        try {
+            const ticketAmenityId = await fetchTicketAmenityId(selectedTicket.id, amenityId); 
+
+            if (ticketAmenityId) {
+                await axios.delete(`http://127.0.0.1:8000/api/amenitiestickets/${ticketAmenityId}/`); // Delete request
+
+                // Update local state to remove the deleted amenity
+                setSelectedAmenities((prevState) => {
+                    const newState = { ...prevState };
+                    delete newState[amenityId]; // Remove the selected amenity
+                    return newState;
+                });
+
+                setDeletionMessage(`Amenity has been removed successfully.`); // Set deletion confirmation message
+            }
+        } catch (error) {
+            console.error(`Error removing amenity with id ${amenityId}:`, error);
+        }
+    };
+
+    const fetchTicketAmenityId = async (ticketId: number, amenityId: number): Promise<number | null> => {
+        try {
+            const response = await axios.get(`http://127.0.0.1:8000/api/amenitiestickets/`, {
+                params: { ticket: ticketId }
+            });
+            
+            const amenityTicket = response.data.find((item: { amenity: number }) => item.amenity === amenityId);
+            
+            return amenityTicket ? amenityTicket.id : null; // Return the amenity ticket ID
+        } catch (error) {
+            console.error('Error fetching ticket amenity ID:', error);
+            return null;
+        }
+    };
+
+    const calculateTotalPrice = () => {
+        return amenities.reduce((total, amenity) => {
+            const price = parseFloat(amenity.price);
+            const isFreeForCabin = selectedTicket && amenity.cabin_types.includes(selectedTicket.cabintypeid);
+
+            if (selectedAmenities[amenity.id] && price > 0 && !isFreeForCabin) {
+                return total + price;
+            }
+            return total;
+        }, 0);
+    };
+
+    const totalPrice = calculateTotalPrice();
+    const tax = totalPrice * 0.05;
+    const totalPayable = totalPrice + tax;
+    const selectedCount = Object.values(selectedAmenities).filter(Boolean).length;
+
+    const handleSaveAndConfirm = () => {
+        if (!selectedTicket) {
+            setErrorMessage('No ticket selected.');
+            return;
+        }
+
+        const selectedAmenitiesList = amenities.filter(amenity => selectedAmenities[amenity.id]);
+        
+        selectedAmenitiesList.forEach(async (amenity) => {
+            const price = parseFloat(amenity.price);
+            const isFreeForCabin = selectedTicket && amenity.cabin_types.includes(selectedTicket.cabintypeid);
+            const finalPrice = isFreeForCabin ? 0 : price + (price * 0.05); // Price with tax if applicable
+
+            try {
+                await axios.post('http://127.0.0.1:8000/api/amenitiestickets/', {
+                    amenity: amenity.id,
+                    ticket: selectedTicket.id,
+                    price: finalPrice.toFixed(2),
+                });
+                console.log(`Amenity ${amenity.service} saved for ticket ${selectedTicket.id} with price ${finalPrice}`);
+            } catch (error) {
+                console.error(`Error saving amenity ${amenity.service}:`, error);
+            }
+        });
+
+        window.location.reload(); // Refresh the page after saving
     };
 
     return (
         <div>
-            {/* Поле ввода для номера бронирования */}
             <div>
                 <label>Booking reference:</label>
                 <input
@@ -96,78 +228,77 @@ const AmenitiesBuyPage: React.FC = () => {
                 <button onClick={handleSearch}>OK</button>
             </div>
 
-            {/* Вывод сообщения об ошибке, если оно есть */}
             {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+            {deletionMessage && <p style={{ color: 'green' }}>{deletionMessage}</p>} {/* Display deletion message */}
 
-            {/* Вывод данных о билетах, если они есть */}
-            {tickets.length > 0 ? (
+            {selectedTicket && (
                 <div>
-                    <h2>Flight list:</h2>
-                    <ul>
-                        {tickets.map(ticket => (
-                            <li key={ticket.id}>
-                                {ticket.first_name} {ticket.last_name} - {ticket.booking_reference}
-                            </li>
-                        ))}
-                    </ul>
+                    <h3>Passenger Information:</h3>
+                    <p>Full Name: {selectedTicket.first_name} {selectedTicket.last_name}</p>
+                    <p>Passport Number: {selectedTicket.passport_number}</p>
+                    <p>Cabin Type ID: {selectedTicket.cabintypeid}</p>
                 </div>
-            ) : (
-                <p>No tickets available</p>
             )}
 
-            {/* Вывод данных о маршрутах, если они есть */}
-            {schedules.length > 0 ? (
+            {tickets.length > 0 && (
                 <div>
-                    <h2>Schedule Information:</h2>
-                    <ul>
+                    <h2>Select your flight:</h2>
+                    <select onChange={(e) => setSelectedSchedule(Number(e.target.value))} value={selectedSchedule || ''}>
+                        <option value="">Select a flight</option>
                         {schedules.map(schedule => (
-                            <li key={schedule.id}>
-                                Flight: {schedule.flight_number}, Departure: {schedule.from_airport.name}, Arrival: {schedule.to_airport.name}, Date: {schedule.date}
-                            </li>
+                            <option key={schedule.id} value={schedule.id}>
+                                Flight: {schedule.flight_number}, Departure: {schedule.from_airport.name}, Arrival: {schedule.to_airport.name}, Date: {schedule.date + " " + schedule.time}
+                            </option>
                         ))}
-                    </ul>
+                    </select>
                 </div>
-            ) : (
-                tickets.length > 0 && <p>No schedules available for these tickets.</p>
             )}
 
-            {/* Остальная часть интерфейса */}
-            <div style={{ marginTop: '10px', border: '1px solid black', padding: '10px' }}>
-                <p>AMONIC Airlines Amenities</p>
-                <div>
+            {selectedSchedule && (
+                <div style={{ marginTop: '10px', border: '1px solid black', padding: '10px' }}>
+                    <p>AMONIC Airlines Amenities</p>
                     <div>
-                        <input type="checkbox" checked readOnly /> Soft Drinks (Free)
-                    </div>
-                    <div>
-                        <input type="checkbox" checked readOnly /> Wi-Fi 50 MB (Free)
-                    </div>
-                    <div>
-                        <input type="checkbox" /> Next Seat Free ($30)
-                    </div>
-                    <div>
-                        <input type="checkbox" /> Wi-Fi 250 MB ($50)
-                    </div>
-                    <div>
-                        <input type="checkbox" /> Extra Bag ($15)
-                    </div>
-                    <div>
-                        <input type="checkbox" /> Laptop Rental ($15)
+                        {amenities.map(amenity => {
+                            const price = parseFloat(amenity.price);
+                            const isFreeForCabin = selectedTicket && amenity.cabin_types.includes(selectedTicket.cabintypeid);
+                            const displayedPrice = isFreeForCabin ? 0 : price;
+
+                            return (
+                                <div key={amenity.id}>
+                                    <input 
+                                        type="checkbox" 
+                                        checked={displayedPrice === 0 || !!selectedAmenities[amenity.id]} 
+                                        disabled={displayedPrice === 0} 
+                                        onChange={() => {
+                                            if (selectedAmenities[amenity.id]) {
+                                                handleRemoveAmenity(amenity.id);
+                                            } else {
+                                                handleAmenityChange(amenity.id, displayedPrice);
+                                            }
+                                        }}
+                                    /> 
+                                    {amenity.service} {displayedPrice > 0 ? `($${displayedPrice})` : '(Free)'}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
-            </div>
+            )}
+
+            {selectedSchedule && (
+                <div style={{ marginTop: '10px' }}>
+                    <p>Items selected: {selectedCount}</p>
+                    <p>Duties and taxes: ${tax.toFixed(2)}</p>
+                    <p>Total payable: ${totalPayable.toFixed(2)}</p>
+                </div>
+            )}
 
             <div style={{ marginTop: '10px' }}>
-                <p>Items selected: [ $XX ]</p>
-                <p>Duties and taxes: [ $XX ]</p>
-                <p>Total payable: [ $XX ]</p>
-            </div>
-
-            <div style={{ marginTop: '10px' }}>
-                <button>Save and Confirm</button>
-                <button style={{ marginLeft: '10px' }}>Exit</button>
+                <button onClick={handleSaveAndConfirm}>Save and Confirm</button>
             </div>
         </div>
     );
 };
 
 export default AmenitiesBuyPage;
+
