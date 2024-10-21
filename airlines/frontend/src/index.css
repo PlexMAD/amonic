@@ -22,7 +22,8 @@ code {
 }
 
 .header__logo img {
-  height: 50px; /* Размер логотипа */
+  height: 150px; /* Размер логотипа */
+  width: 535px;
 }
 
 .header__buttons button {
@@ -527,6 +528,7 @@ code {
 }
 /* FlightScheduleManager */
 /* FlightSearch */
+/* Основные стили для формы поиска рейсов */
 .flight-search {
   max-width: 900px; /* Увеличиваем максимальную ширину формы */
   margin: 40px auto;
@@ -538,15 +540,23 @@ code {
 
 .flight-search__heading {
   text-align: center;
-  margin-bottom: 30px;
   font-size: 24px;
+  margin-bottom: 20px;
   color: #333;
-  font-weight: bold;
 }
 
 .flight-search__form {
   display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.flight-search__form-group {
+  display: flex;
   flex-direction: column;
+  width: 300px;
 }
 
 .flight-search__label {
@@ -570,11 +580,11 @@ code {
 
 /* Стили кнопки поиска */
 .flight-search__button {
-  background-color: #4CAF50;
+  margin-right: 10px;
+  padding: 10px 20px;
+  background-color: #4caf50;
   color: white;
-  padding: 12px 20px;
   border: none;
-  border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
   margin-bottom: 20px;
@@ -594,6 +604,40 @@ code {
 .flight-search__table {
   width: 100%;
   border-collapse: collapse;
+}
+
+.report__table-row--header {
+  background-color: #b7b7b7;
+  color: black;
+}
+
+.report__table-header {
+  padding: 10px;
+  border: 1px solid black;
+  text-align: left;
+}
+
+.report__table-cell {
+  padding: 10px;
+  border: 1px solid black;
+  background-color: #ffffe0;
+}
+
+.report__list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.report__list-item {
+  font-size: 16px;
+  background-color: #ffffe0;
+  padding: 10px;
+  margin-bottom: 5px;
+  border: 1px solid black;
+}
+
+.report__footer {
+  text-align: center;
   margin-top: 20px;
 }
 
@@ -604,16 +648,66 @@ code {
   font-size: 16px;
 }
 
-.flight-search__table-row.red-row {
-  background-color: #ffcccc;
+.report__button:hover {
+  background-color: #45a049;
 }
 
-.flight-search__table-row.green-row {
-  background-color: #ccffcc;
+/* FlightReport */
+/* FUllFlightReport */
+.full-report {
+  max-width: 1200px;
+  margin: 40px auto;
+  background-color: #fff8b5; /* Светло-желтый фон */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.flight-search__table-row.yellow-row {
-  background-color: #ffffcc;
+.full-report__title {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+}
+
+.full-report__table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffe0; /* Цвет таблицы */
+}
+
+.full-report__header-row {
+  background-color: #b7b7b7;
+}
+
+.full-report__header-cell {
+  padding: 10px;
+  font-weight: bold;
+  border: 1px solid black;
+}
+
+.full-report__row {
+  background-color: #fff8b5;
+}
+
+.full-report__cell {
+  padding: 10px;
+  border: 1px solid black;
+  text-align: center;
+}
+
+.full-report__cell:nth-child(even) {
+  background-color: #ffffe0;
+}
+
+.full-report__row:hover {
+  background-color: #f2f2f2;
+}
+
+.full-report__footer {
+  padding-top: 20px;
+  text-align: center;
 }
 
 /* Кнопки выбора рейсов */
