@@ -24,6 +24,8 @@ code {
 .header__logo img {
   height: 150px; /* Размер логотипа */
   width: 535px;
+  height: 150px; /* Размер логотипа */
+  width: 535px;
 }
 
 .header__buttons button {
@@ -530,6 +532,7 @@ code {
 /* FlightScheduleManager */
 /* FlightSearch */
 /* Основные стили для формы поиска рейсов */
+/* Основные стили для формы поиска рейсов */
 .flight-search {
   width: 100%;
   padding: 20px;
@@ -540,6 +543,7 @@ code {
 .flight-search__title {
   text-align: center;
   font-size: 24px;
+  margin-bottom: 20px;
   margin-bottom: 20px;
   color: #333;
 }
@@ -554,7 +558,16 @@ code {
 
 .flight-search__form-group {
   display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.flight-search__form-group {
+  display: flex;
   flex-direction: column;
+  width: 300px;
   width: 300px;
 }
 
@@ -576,6 +589,9 @@ code {
 }
 
 .flight-search__button {
+  margin-right: 10px;
+  padding: 10px 20px;
+  background-color: #4caf50;
   margin-right: 10px;
   padding: 10px 20px;
   background-color: #4caf50;
