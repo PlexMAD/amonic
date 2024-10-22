@@ -65,7 +65,6 @@ const App: React.FC = () => {
         <Route path="/amenities" element={<PrivateRoute component={AmenitiesBuyPage} role={2} userRole={userRole} />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-      <Footer />
     </Router>
   );
 };

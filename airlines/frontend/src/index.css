@@ -208,7 +208,6 @@ code {
 }
 .user-panel__buttons {
   margin-top: 20px;
-  position: sticky;
   bottom: 0;
   background-color: #fff8b5; 
   padding: 10px;
