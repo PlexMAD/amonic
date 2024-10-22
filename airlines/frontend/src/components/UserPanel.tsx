@@ -133,7 +133,7 @@ const UserPanel: React.FC = () => {
               <td className="user-panel__cell">{session.logout_time ? new Date(session.logout_time).toLocaleTimeString() : '**'}</td>
               <td className="user-panel__cell">{session.duration || '**'}</td>
               <td className="user-panel__cell" style={{ color: session.logout_reason ? 'red' : 'black' }}>
-                {session.logout_reason || 'Выход удачен'}
+                {session.logout_reason || 'Выход удачен\/сессия активна'}
               </td>
             </tr>
           ))}
