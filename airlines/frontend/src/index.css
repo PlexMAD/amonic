@@ -21,12 +21,6 @@ code {
   background-color: #b7b7b7; /* Цвет фона шапки */
 }
 
-.header__logo img {
-  height: 150px; /* Размер логотипа */
-  width: 535px;
-  height: 150px; /* Размер логотипа */
-  width: 535px;
-}
 
 .header__buttons button {
   margin-left: 10px;

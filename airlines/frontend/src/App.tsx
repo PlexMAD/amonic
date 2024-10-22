@@ -12,6 +12,7 @@ import FlightSearch from './components/FlightSearch';
 import FlightSatisfactionReport from './components/FlightSatisfactionReport';
 import FullReport from './components/FullReport';
 import AmenitiesBuyPage from './components/AmenitiesBuyPage';
+
 const App: React.FC = () => {
   const [userRole, setUserRole] = useState<number | null>(null);
   const [loading, setLoading] = useState<boolean>(true);

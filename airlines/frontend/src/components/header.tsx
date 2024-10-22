@@ -27,7 +27,7 @@ const Header: React.FC = () => {
   return (
     <header className="header">
       <div className="header__logo">
-        <img src="./airlines/frontend/logo.png" alt="" /> {/*путь к логотипу */}
+        <img src="logo.png" alt="" /> 
       </div>
       <div className="header__buttons">
         <button onClick={handleNavigateToUserPanel}>Пользовательская панель</button>
